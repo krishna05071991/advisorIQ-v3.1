@@ -32,8 +32,8 @@ export const MobileNavigation: React.FC = () => {
   const navItems = user?.role === 'operations' ? operationsNavItems : advisorNavItems;
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 nav-glass border-t border-white/20 z-50">
-      <div className="flex justify-around items-center py-3">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
+      <div className="flex justify-around items-center py-2">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
@@ -41,14 +41,14 @@ export const MobileNavigation: React.FC = () => {
             <Link
               key={item.path}
               to={item.path}
-              className={`flex flex-col items-center space-y-1 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-300 ${
+              className={`flex flex-col items-center space-y-1 px-3 py-2 rounded-md text-xs font-medium transition-colors ${
                 isActive
-                  ? 'metallic-button text-white shadow-lg transform scale-105'
-                  : 'text-gray-600 hover:text-blue-600 hover:scale-105'
+                  ? 'text-blue-600'
+                  : 'text-gray-500 hover:text-blue-600'
               }`}
             >
-              <Icon className="w-6 h-6" />
-              <span className="text-xs">{item.label}</span>
+              <Icon className="w-5 h-5" />
+              <span>{item.label}</span>
             </Link>
           );
         })}

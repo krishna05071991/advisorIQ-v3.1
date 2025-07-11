@@ -6,7 +6,6 @@ import { DashboardStats } from '../components/dashboard/DashboardStats';
 import { RecentActivity } from '../components/dashboard/RecentActivity';
 import { TopPerformers } from '../components/dashboard/TopPerformers';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
-import { Sparkles, TrendingUp } from 'lucide-react';
 
 export const Dashboard: React.FC = () => {
   const { user } = useAuth();
@@ -20,10 +19,7 @@ export const Dashboard: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <div className="text-center">
-          <LoadingSpinner size="lg" />
-          <p className="mt-4 text-gray-500 font-medium">Loading your dashboard...</p>
-        </div>
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
@@ -40,26 +36,16 @@ export const Dashboard: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-12">
-        <div className="flex items-center space-x-3 mb-4">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
-            <TrendingUp className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
-              {user?.role === 'operations' ? 'Operations Dashboard' : 'Advisor Dashboard'}
-            </h1>
-            <div className="flex items-center space-x-2 mt-1">
-              <Sparkles className="w-4 h-4 text-yellow-500" />
-              <p className="text-gray-600 font-medium">
-                {user?.role === 'operations' 
-                  ? 'Overview of your advisor network and performance metrics' 
-                  : 'Your personal performance and recommendation tracking'
-                }
-              </p>
-            </div>
-          </div>
-        </div>
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          {user?.role === 'operations' ? 'Operations Dashboard' : 'Advisor Dashboard'}
+        </h1>
+        <p className="text-gray-600">
+          {user?.role === 'operations' 
+            ? 'Overview of your advisor network and performance metrics' 
+            : 'Your personal performance and recommendation tracking'
+          }
+        </p>
       </div>
 
       <DashboardStats stats={
