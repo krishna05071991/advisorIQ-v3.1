@@ -23,6 +23,9 @@ export interface Advisor {
   specialization: string;
   bio?: string;
   profile_image?: string;
+  avatar?: string;
+  rating?: number;
+  recommendations?: number;
   created_at: string;
   updated_at: string;
   user_id: string;
@@ -67,5 +70,9 @@ export interface RecentActivity {
   type: 'recommendation_added' | 'recommendation_updated' | 'advisor_joined';
   description: string;
   created_at: string;
-  advisor?: Advisor;
+  advisor?: {
+    id: string;
+    name: string;
+    avatar?: string;
+  };
 }
