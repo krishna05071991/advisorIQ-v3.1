@@ -24,30 +24,16 @@ export const TopPerformers: React.FC<TopPerformersProps> = ({ performers }) => {
   const getRankColor = (index: number) => {
     switch (index) {
       case 0:
-        return 'from-yellow-400 to-yellow-600';
+        return 'bg-yellow-100 text-yellow-600';
       case 1:
-        return 'from-gray-400 to-gray-600';
+        return 'bg-gray-100 text-gray-600';
       case 2:
-        return 'from-amber-600 to-amber-800';
+        return 'bg-orange-100 text-orange-600';
       default:
-        return 'from-blue-500 to-blue-700';
+        return 'bg-blue-100 text-blue-600';
     }
   };
 
-  const getRankBg = (index: number) => {
-    switch (index) {
-      case 0:
-        return 'from-yellow-50 to-yellow-100';
-      case 1:
-        return 'from-gray-50 to-gray-100';
-      case 2:
-        return 'from-amber-50 to-amber-100';
-      default:
-        return 'from-blue-50 to-blue-100';
-    }
-  };
-
-  // Sample advisor avatars
   const advisorAvatars = [
     'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face',
     'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face',
@@ -57,56 +43,51 @@ export const TopPerformers: React.FC<TopPerformersProps> = ({ performers }) => {
   ];
 
   return (
-    <Card className="p-8" gradient>
-      <div className="flex items-center justify-between mb-8">
-        <h3 className="text-xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
-          Top Performers
-        </h3>
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-50 to-yellow-100 flex items-center justify-center shadow-lg">
-          <Crown className="w-6 h-6 bg-gradient-to-r from-yellow-500 to-yellow-700 bg-clip-text text-transparent" />
+    <Card className="p-6">
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-lg font-semibold text-gray-900">Top Performers</h3>
+        <div className="w-10 h-10 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg flex items-center justify-center">
+          <Crown className="w-5 h-5 text-yellow-600" />
         </div>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-4">
         {performers.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center mx-auto mb-6 shadow-lg">
-              <Trophy className="w-10 h-10 text-gray-300" />
-            </div>
-            <p className="text-lg font-medium">No performance data available</p>
-            <p className="text-sm text-gray-400 mt-1">Top performers will appear here</p>
+          <div className="text-center py-8 text-gray-500">
+            <Trophy className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+            <p>No performance data available</p>
           </div>
         ) : (
           performers.slice(0, 5).map((performer, index) => {
             const Icon = getRankIcon(index);
             const avatarUrl = advisorAvatars[index % advisorAvatars.length];
             return (
-              <div key={performer.advisor_id} className="flex items-center justify-between p-4 rounded-xl hover:chrome-reflection transition-all duration-300">
-                <div className="flex items-center space-x-4">
+              <div key={performer.advisor_id} className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
                   <div className="relative">
                     <img 
                       src={avatarUrl}
                       alt={performer.advisor?.name || 'Advisor'}
-                      className="w-12 h-12 rounded-full object-cover avatar-glow border-2 border-white/60 shadow-lg"
+                      className="w-10 h-10 rounded-full object-cover"
                     />
-                    <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-gradient-to-br ${getRankBg(index)} flex items-center justify-center shadow-lg border-2 border-white`}>
-                      <Icon className={`w-3 h-3 bg-gradient-to-r ${getRankColor(index)} bg-clip-text text-transparent`} />
+                    <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full ${getRankColor(index)} flex items-center justify-center`}>
+                      <Icon className="w-3 h-3" />
                     </div>
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-gray-900">
+                    <p className="text-sm font-medium text-gray-900">
                       {performer.advisor?.name || 'Unknown Advisor'}
                     </p>
-                    <p className="text-xs text-gray-500 font-medium">
+                    <p className="text-xs text-gray-500">
                       {performer.total_recommendations} recommendations
                     </p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+                  <p className="text-sm font-bold text-gray-900">
                     {performer.success_rate.toFixed(1)}%
                   </p>
-                  <p className="text-xs text-gray-500 font-medium">success rate</p>
+                  <p className="text-xs text-gray-500">success rate</p>
                 </div>
               </div>
             );
