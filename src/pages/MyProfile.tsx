@@ -31,6 +31,9 @@ export const MyProfile: React.FC = () => {
     profile_image_url: '',
   });
 
+  const getDefaultAvatar = () => {
+    return 'https://images.pexels.com/photos/2182970/pexels-photo-2182970.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face';
+  };
   useEffect(() => {
     if (user?.id) {
       loadAdvisorProfile();
@@ -49,7 +52,7 @@ export const MyProfile: React.FC = () => {
           phone: profile.phone || '',
           specialization: profile.specialization || '',
           bio: profile.bio || '',
-          profile_image_url: profile.profile_image_url || '',
+          profile_image_url: profile.profile_image_url || getDefaultAvatar(),
         };
         setFormData(profileData);
         setOriginalData(profileData);
@@ -122,12 +125,12 @@ export const MyProfile: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Profile Image */}
-        <Card className="p-6 text-center" gradient>
-          {formData.profile_image_url ? (
+        <Card className="p-6 text-center" variant="glass">
+          {formData.profile_image_url || getDefaultAvatar() ? (
             <img 
-              src={formData.profile_image_url} 
+              src={formData.profile_image_url || getDefaultAvatar()} 
               alt="Profile" 
-              className="w-32 h-32 mx-auto mb-4 rounded-full object-cover"
+              className="w-32 h-32 mx-auto mb-4 rounded-full object-cover border-4 border-white shadow-lg"
             />
           ) : (
             <div className="w-32 h-32 mx-auto mb-4 rounded-full bg-blue-100 flex items-center justify-center">
@@ -146,7 +149,7 @@ export const MyProfile: React.FC = () => {
         </Card>
 
         {/* Profile Information */}
-        <Card className="p-6 lg:col-span-2" gradient>
+        <Card className="p-6 lg:col-span-2" variant="glass">
           <h3 className="text-lg font-semibold text-gray-900 mb-6">Profile Information</h3>
           
           {saveError && (

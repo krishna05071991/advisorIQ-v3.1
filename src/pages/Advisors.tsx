@@ -11,6 +11,19 @@ export const Advisors: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSpecialization, setFilterSpecialization] = useState('');
 
+  const getAvatarUrl = (index: number) => {
+    const avatars = [
+      'https://images.pexels.com/photos/2182970/pexels-photo-2182970.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face',
+      'https://images.pexels.com/photos/3785077/pexels-photo-3785077.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face',
+      'https://images.pexels.com/photos/3760263/pexels-photo-3760263.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face',
+      'https://images.pexels.com/photos/3777931/pexels-photo-3777931.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face',
+      'https://images.pexels.com/photos/3184298/pexels-photo-3184298.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face',
+      'https://images.pexels.com/photos/3756679/pexels-photo-3756679.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face',
+      'https://images.pexels.com/photos/3785079/pexels-photo-3785079.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face',
+      'https://images.pexels.com/photos/3771120/pexels-photo-3771120.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face'
+    ];
+    return avatars[index % avatars.length];
+  };
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -86,12 +99,14 @@ export const Advisors: React.FC = () => {
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredAdvisors.map((advisor) => (
+          {filteredAdvisors.map((advisor, index) => (
             <Card key={advisor.id} className="p-6" gradient>
               <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                  <Users className="w-6 h-6 text-blue-600" />
-                </div>
+                <img 
+                  src={getAvatarUrl(index)}
+                  alt={advisor.name}
+                  className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm flex-shrink-0"
+                />
                 <div className="flex-1 min-w-0">
                   <h3 className="text-lg font-semibold text-gray-900 mb-1">
                     {advisor.name}
