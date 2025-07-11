@@ -1,4 +1,5 @@
-import React from 'react';
+import { supabase } from '../supabase';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { usePerformanceMetrics } from '../hooks/usePerformanceMetrics';
 import { Card } from '../components/ui/Card';
@@ -7,7 +8,26 @@ import { TrendingUp, Target, Award, BarChart3 } from 'lucide-react';
 
 export const MyPerformance: React.FC = () => {
   const { user } = useAuth();
-  const { metrics, loading } = usePerformanceMetrics(user?.id);
+  const [advisorId, setAdvisorId] = useState<string | null>(null);
+  const { metrics, loading } = usePerformanceMetrics(advisorId || undefined);
+
+  useEffect(() => {
+    const fetchAdvisorId = async () => {
+      if (user?.id) {
+        const { data: advisor } = await supabase
+          .from('advisors')
+          .select('id')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (advisor) {
+          setAdvisorId(advisor.id);
+        }
+      }
+    };
+
+    fetchAdvisorId();
+  }, [user?.id]);
 
   if (loading) {
     return (

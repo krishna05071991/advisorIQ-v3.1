@@ -57,6 +57,7 @@ export interface DashboardStats {
   total_advisors: number;
   total_recommendations: number;
   overall_success_rate: number;
+  active_recommendations: number;
   recent_activity: RecentActivity[];
   top_performers: PerformanceMetrics[];
 }

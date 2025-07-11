@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { supabase } from '../supabase';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useRecommendations } from '../hooks/useRecommendations';
 import { Card } from '../components/ui/Card';
@@ -9,8 +10,28 @@ import { TrendingUp, Plus, Search } from 'lucide-react';
 
 export const MyRecommendations: React.FC = () => {
   const { user } = useAuth();
-  const { recommendations, loading } = useRecommendations(user?.id);
+  // Get advisor ID from advisors table, not user ID
+  const [advisorId, setAdvisorId] = useState<string | null>(null);
+  const { recommendations, loading } = useRecommendations(advisorId || undefined);
   const [searchTerm, setSearchTerm] = useState('');
+
+  useEffect(() => {
+    const fetchAdvisorId = async () => {
+      if (user?.id) {
+        const { data: advisor } = await supabase
+          .from('advisors')
+          .select('id')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (advisor) {
+          setAdvisorId(advisor.id);
+        }
+      }
+    };
+
+    fetchAdvisorId();
+  }, [user?.id]);
 
   if (loading) {
     return (
