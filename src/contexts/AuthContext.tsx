@@ -25,6 +25,11 @@ interface AuthProviderProps {
 
 // Helper function to create advisor profile
 const createAdvisorProfile = async (userProfile: SupabaseProfile) => {
+  // Only create advisor profile for advisor users
+  if (userProfile.role !== 'advisor') {
+    return;
+  }
+
   try {
     // Check if advisor profile already exists
     const { data: existingAdvisor, error } = await supabase
