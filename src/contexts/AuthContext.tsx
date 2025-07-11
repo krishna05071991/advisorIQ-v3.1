@@ -27,17 +27,17 @@ interface AuthProviderProps {
 const createAdvisorProfile = async (userProfile: SupabaseProfile) => {
   try {
     // Check if advisor profile already exists
-    const { data: existingAdvisor } = await supabase
+    const { data: existingAdvisor, error } = await supabase
       .from('advisors')
       .select('id')
       .eq('user_id', userProfile.id)
       .single();
 
-    if (!existingAdvisor) {
-      // Create new advisor profile with default values
+    if (error && error.code === 'PGRST116') {
+      // No rows returned - this is expected for a new advisor, proceed with creation
       const defaultName = userProfile.email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
       
-      const { error } = await supabase
+      const { error: insertError } = await supabase
         .from('advisors')
         .insert({
           user_id: userProfile.id,
@@ -46,8 +46,27 @@ const createAdvisorProfile = async (userProfile: SupabaseProfile) => {
           is_active: true
         });
 
-      if (error) {
-        console.error('Error creating advisor profile:', error);
+      if (insertError) {
+        console.error('Error creating advisor profile:', insertError);
+      }
+    } else if (error) {
+      // Some other error occurred
+      console.error('Error checking existing advisor profile:', error);
+    } else if (!existingAdvisor) {
+      // Create new advisor profile with default values
+      const defaultName = userProfile.email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      
+      const { error: insertError } = await supabase
+        .from('advisors')
+        .insert({
+          user_id: userProfile.id,
+          name: defaultName,
+          email: userProfile.email,
+          is_active: true
+        });
+
+      if (insertError) {
+        console.error('Error creating advisor profile:', insertError);
       }
     }
   } catch (error) {
