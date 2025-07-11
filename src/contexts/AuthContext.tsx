@@ -23,6 +23,37 @@ interface AuthProviderProps {
   children: React.ReactNode;
 }
 
+// Helper function to create advisor profile
+const createAdvisorProfile = async (userProfile: SupabaseProfile) => {
+  try {
+    // Check if advisor profile already exists
+    const { data: existingAdvisor } = await supabase
+      .from('advisors')
+      .select('id')
+      .eq('user_id', userProfile.id)
+      .single();
+
+    if (!existingAdvisor) {
+      // Create new advisor profile with default values
+      const defaultName = userProfile.email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      
+      const { error } = await supabase
+        .from('advisors')
+        .insert({
+          user_id: userProfile.id,
+          name: defaultName,
+          email: userProfile.email,
+          is_active: true
+        });
+
+      if (error) {
+        console.error('Error creating advisor profile:', error);
+      }
+    }
+  } catch (error) {
+    console.error('Error in createAdvisorProfile:', error);
+  }
+};
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -50,6 +81,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           .eq('id', session.user.id)
           .single<SupabaseProfile>();
         if (profile && !error) {
+          // If user is an advisor, ensure their advisor profile exists
+          if (profile.role === 'advisor') {
+            await createAdvisorProfile(profile);
+          }
+          
           setUser({
             id: profile.id,
             email: profile.email,
@@ -84,6 +120,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         .eq('id', data.session.user.id)
         .single<SupabaseProfile>();
       if (profile && !profileError) {
+        // If user is an advisor, ensure their advisor profile exists
+        if (profile.role === 'advisor') {
+          await createAdvisorProfile(profile);
+        }
+        
         setUser({
           id: profile.id,
           email: profile.email,
