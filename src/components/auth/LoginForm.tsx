@@ -27,15 +27,15 @@ export const LoginForm: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md" gradient>
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <Card className="w-full max-w-md" variant="glass">
         <div className="p-8">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-2xl floating-element">
               <BarChart3 className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">AdvisorIQ</h1>
-            <p className="text-gray-600">Premium Fintech Intelligence Platform</p>
+            <h1 className="text-3xl font-extralight text-slate-900 mb-2 tracking-wide">AdvisorIQ</h1>
+            <p className="text-slate-600 font-light">Premium Fintech Intelligence Platform</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -58,7 +58,7 @@ export const LoginForm: React.FC = () => {
             />
 
             {error && (
-              <div className="text-red-600 text-sm text-center bg-red-50 p-3 rounded-lg">
+              <div className="text-red-600/80 text-sm text-center bg-red-50/50 p-3 rounded-xl backdrop-blur-sm font-light">
                 {error}
               </div>
             )}
@@ -74,7 +74,7 @@ export const LoginForm: React.FC = () => {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-slate-500 font-light">
               Role is automatically determined by your account type
             </p>
           </div>

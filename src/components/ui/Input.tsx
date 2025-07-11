@@ -14,20 +14,20 @@ export const Input: React.FC<InputProps> = ({
   ...props
 }) => {
   const inputClasses = `
-    w-full px-4 py-3 border-2 border-gray-200 rounded-lg 
-    focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50
-    transition-all duration-200 outline-none
-    ${error ? 'border-red-300 focus:border-red-500 focus:ring-red-200' : ''}
+    metallic-input w-full px-4 py-3 rounded-xl 
+    focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20
+    transition-all duration-300 outline-none font-light
+    ${error ? 'border-red-300/50 focus:border-red-500/50 focus:ring-red-500/20' : ''}
     ${floating ? 'peer' : ''}
   `;
 
   const labelClasses = floating
     ? `
-      absolute left-4 top-3 text-gray-500 transition-all duration-200 pointer-events-none
-      peer-focus:top-1 peer-focus:text-xs peer-focus:text-blue-600
-      peer-[:not(:placeholder-shown)]:top-1 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:text-blue-600
+      absolute left-4 top-3 text-slate-500 transition-all duration-300 pointer-events-none font-light
+      peer-focus:top-1 peer-focus:text-xs peer-focus:text-blue-600/80
+      peer-[:not(:placeholder-shown)]:top-1 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:text-blue-600/80
     `
-    : 'block text-sm font-medium text-gray-700 mb-2';
+    : 'block text-sm font-light text-slate-700 mb-2';
 
   return (
     <div className={`relative ${className}`}>
@@ -42,7 +42,7 @@ export const Input: React.FC<InputProps> = ({
         </label>
       )}
       {error && (
-        <p className="mt-1 text-sm text-red-600">{error}</p>
+        <p className="mt-1 text-sm text-red-600/80 font-light">{error}</p>
       )}
     </div>
   );

@@ -44,13 +44,13 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
       {statItems.map((item, index) => {
         const Icon = item.icon;
         return (
-          <Card key={index} className="p-6" gradient>
+          <Card key={index} className="p-6" variant="glass">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">{item.label}</p>
-                <p className="text-2xl font-bold text-gray-900">{item.value}</p>
+                <p className="text-sm font-light text-slate-600 mb-1">{item.label}</p>
+                <p className="text-2xl font-extralight text-slate-900">{item.value}</p>
               </div>
-              <div className={`w-12 h-12 rounded-lg bg-${item.color}-100 flex items-center justify-center`}>
+              <div className={`w-12 h-12 rounded-2xl bg-${item.color}-100/60 backdrop-blur-sm flex items-center justify-center shadow-lg`}>
                 <Icon className={`w-6 h-6 text-${item.color}-600`} />
               </div>
             </div>

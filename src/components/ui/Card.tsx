@@ -3,21 +3,29 @@ import React from 'react';
 interface CardProps {
   children: React.ReactNode;
   className?: string;
-  gradient?: boolean;
+  variant?: 'default' | 'glass' | 'premium' | 'floating';
 }
 
 export const Card: React.FC<CardProps> = ({ 
   children, 
   className = '', 
-  gradient = false 
+  variant = 'glass' 
 }) => {
-  const baseClasses = 'rounded-xl shadow-lg border border-gray-100 overflow-hidden';
-  const gradientClasses = gradient 
-    ? 'bg-gradient-to-br from-white to-gray-50' 
-    : 'bg-white';
+  const getVariantClasses = () => {
+    switch (variant) {
+      case 'glass':
+        return 'glass-card rounded-2xl';
+      case 'premium':
+        return 'premium-gradient rounded-2xl shadow-2xl border border-white/30';
+      case 'floating':
+        return 'glass-card rounded-2xl floating-element';
+      default:
+        return 'bg-white/90 backdrop-blur-sm rounded-2xl shadow-soft border border-white/20';
+    }
+  };
 
   return (
-    <div className={`${baseClasses} ${gradientClasses} ${className}`}>
+    <div className={`${getVariantClasses()} ${className}`}>
       {children}
     </div>
   );
