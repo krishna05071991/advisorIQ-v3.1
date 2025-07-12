@@ -167,7 +167,6 @@ export const Analytics: React.FC = () => {
             <p className="text-xs md:text-sm">Rankings will appear as advisors create recommendations</p>
           </div>
         )}
-        </div>
       </Card>
     </div>
   );
