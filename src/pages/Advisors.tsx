@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { useAdvisors } from '../hooks/useAdvisors';
+import { AdvisorFormModal } from '../components/modals/AdvisorFormModal';
+import { AdvisorDetailModal } from '../components/modals/AdvisorDetailModal';
+import { Advisor } from '../types';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -7,9 +10,14 @@ import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { Users, Plus, Search, Filter } from 'lucide-react';
 
 export const Advisors: React.FC = () => {
-  const { advisors, loading } = useAdvisors();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSpecialization, setFilterSpecialization] = useState('');
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [selectedAdvisor, setSelectedAdvisor] = useState<Advisor | null>(null);
+  const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
+  
+  const { advisors, loading, createAdvisor, updateAdvisor } = useAdvisors(searchTerm, filterSpecialization);
 
   const getAvatarUrl = (index: number) => {
     const avatars = [
@@ -24,6 +32,38 @@ export const Advisors: React.FC = () => {
     ];
     return avatars[index % avatars.length];
   };
+
+  const handleAddAdvisor = () => {
+    setFormMode('create');
+    setSelectedAdvisor(null);
+    setIsFormModalOpen(true);
+  };
+
+  const handleEditAdvisor = (advisor: Advisor) => {
+    setFormMode('edit');
+    setSelectedAdvisor(advisor);
+    setIsFormModalOpen(true);
+  };
+
+  const handleViewProfile = (advisor: Advisor) => {
+    setSelectedAdvisor(advisor);
+    setIsDetailModalOpen(true);
+  };
+
+  const handleFormSubmit = async (data: Partial<Advisor>) => {
+    if (formMode === 'create') {
+      await createAdvisor(data);
+    } else if (selectedAdvisor) {
+      await updateAdvisor(selectedAdvisor.id, data);
+    }
+  };
+
+  const closeModals = () => {
+    setIsFormModalOpen(false);
+    setIsDetailModalOpen(false);
+    setSelectedAdvisor(null);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -47,7 +87,7 @@ export const Advisors: React.FC = () => {
             <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">Advisors</h1>
             <p className="text-sm md:text-base text-gray-600">Manage your advisor network</p>
           </div>
-          <Button className="flex items-center space-x-1 md:space-x-2 px-3 md:px-6">
+          <Button onClick={handleAddAdvisor} className="flex items-center space-x-1 md:space-x-2 px-3 md:px-6">
             <Plus className="w-4 h-4" />
             <span className="hidden sm:inline">Add Advisor</span>
             <span className="sm:hidden">Add</span>
@@ -93,7 +133,7 @@ export const Advisors: React.FC = () => {
               : 'Get started by adding your first advisor'
             }
           </p>
-          <Button className="w-full sm:w-auto">
+          <Button onClick={handleAddAdvisor} className="w-full sm:w-auto">
             <Plus className="w-4 h-4 mr-2" />
             <span className="hidden sm:inline">Add Advisor</span>
             <span className="sm:hidden">Add</span>
@@ -116,11 +156,21 @@ export const Advisors: React.FC = () => {
                   <p className="text-xs md:text-sm text-gray-600 mb-1 md:mb-2 truncate">{advisor.specialization}</p>
                   <p className="text-xs md:text-sm text-gray-500 mb-3 md:mb-4 truncate">{advisor.email}</p>
                   <div className="flex flex-col sm:flex-row gap-2">
-                    <Button size="sm" variant="secondary" className="flex-1 sm:flex-none">
+                    <Button 
+                      size="sm" 
+                      variant="secondary" 
+                      className="flex-1 sm:flex-none"
+                      onClick={() => handleViewProfile(advisor)}
+                    >
                       <span className="hidden sm:inline">View Profile</span>
                       <span className="sm:hidden">View</span>
                     </Button>
-                    <Button size="sm" variant="ghost" className="flex-1 sm:flex-none">
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      className="flex-1 sm:flex-none"
+                      onClick={() => handleEditAdvisor(advisor)}
+                    >
                       Edit
                     </Button>
                   </div>
@@ -130,6 +180,25 @@ export const Advisors: React.FC = () => {
           ))}
         </div>
       )}
+
+      {/* Modals */}
+      <AdvisorFormModal
+        isOpen={isFormModalOpen}
+        onClose={closeModals}
+        onSubmit={handleFormSubmit}
+        advisor={selectedAdvisor}
+        mode={formMode}
+      />
+
+      <AdvisorDetailModal
+        isOpen={isDetailModalOpen}
+        onClose={closeModals}
+        advisor={selectedAdvisor}
+        onEdit={(advisor) => {
+          setIsDetailModalOpen(false);
+          handleEditAdvisor(advisor);
+        }}
+      />
     </div>
   );
 };

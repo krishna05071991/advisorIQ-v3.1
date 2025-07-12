@@ -2,23 +2,36 @@ import { useState, useEffect } from 'react';
 import { Advisor } from '../types';
 import { supabase } from '../supabase';
 
-export const useAdvisors = () => {
+export const useAdvisors = (searchTerm?: string, filterSpecialization?: string) => {
   const [advisors, setAdvisors] = useState<Advisor[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchAdvisors();
-  }, []);
+  }, [searchTerm, filterSpecialization]);
 
   const fetchAdvisors = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      
+      let query = supabase
         .from('advisors')
         .select('*')
         .eq('is_active', true)
         .order('name');
+      
+      // Apply search filter
+      if (searchTerm && searchTerm.trim()) {
+        query = query.or(`name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`);
+      }
+      
+      // Apply specialization filter
+      if (filterSpecialization && filterSpecialization.trim()) {
+        query = query.eq('specialization', filterSpecialization);
+      }
+      
+      const { data, error } = await query;
       
       if (error) {
         throw error;
@@ -57,14 +70,45 @@ export const useAdvisors = () => {
       throw err;
     }
   };
-  const createAdvisor = async (advisorData: Partial<Advisor>) => {
+  const createAdvisor = async (advisorData: Partial<Advisor>): Promise<void> => {
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('advisors')
-        .insert(advisorData);
+        .insert({
+          ...advisorData,
+          is_active: true
+        })
+        .select()
+        .single();
       
       if (error) {
         throw error;
+      }
+      
+      // Also create a user profile if email is provided and not exists
+      if (advisorData.email) {
+        try {
+          // Check if user profile exists
+          const { data: existingProfile } = await supabase
+            .from('user_profiles')
+            .select('id')
+            .eq('email', advisorData.email)
+            .single();
+          
+          if (!existingProfile) {
+            // Create user profile for this advisor
+            await supabase
+              .from('user_profiles')
+              .insert({
+                email: advisorData.email,
+                full_name: advisorData.name || '',
+                role: 'advisor'
+              });
+          }
+        } catch (profileError) {
+          console.warn('Could not create user profile:', profileError);
+          // Continue anyway as the advisor was created successfully
+        }
       }
       
       await fetchAdvisors();
@@ -74,16 +118,21 @@ export const useAdvisors = () => {
     }
   };
 
-  const updateAdvisor = async (userId: string, advisorData: Partial<Advisor>) => {
+  const updateAdvisor = async (advisorId: string, advisorData: Partial<Advisor>): Promise<void> => {
     try {
       const { error } = await supabase
         .from('advisors')
-        .update(advisorData)
-        .eq('user_id', userId);
+        .update({
+          ...advisorData,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', advisorId);
       
       if (error) {
         throw error;
       }
+      
+      await fetchAdvisors();
     } catch (err) {
       console.error('Error updating advisor:', err);
       throw err;
@@ -108,6 +157,25 @@ export const useAdvisors = () => {
     }
   };
 
+  const getAdvisorById = async (id: string): Promise<Advisor | null> => {
+    try {
+      const { data, error } = await supabase
+        .from('advisors')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (error) {
+        throw error;
+      }
+      
+      return data;
+    } catch (err) {
+      console.error('Error fetching advisor by ID:', err);
+      return null;
+    }
+  };
+
   return {
     advisors,
     loading,
@@ -117,5 +185,6 @@ export const useAdvisors = () => {
     createAdvisor,
     updateAdvisor,
     deleteAdvisor,
+    getAdvisorById,
   };
 };
