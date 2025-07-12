@@ -12,12 +12,11 @@ import { Users, Plus, Search, Filter } from 'lucide-react';
 export const Advisors: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSpecialization, setFilterSpecialization] = useState('');
-  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedAdvisor, setSelectedAdvisor] = useState<Advisor | null>(null);
-  const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
-  const { advisors, loading, createAdvisor, updateAdvisor } = useAdvisors(searchTerm, filterSpecialization);
+  const { advisors, loading, updateAdvisor } = useAdvisors(searchTerm, filterSpecialization);
 
   const getAvatarUrl = (index: number) => {
     const avatars = [
@@ -33,16 +32,9 @@ export const Advisors: React.FC = () => {
     return avatars[index % avatars.length];
   };
 
-  const handleAddAdvisor = () => {
-    setFormMode('create');
-    setSelectedAdvisor(null);
-    setIsFormModalOpen(true);
-  };
-
   const handleEditAdvisor = (advisor: Advisor) => {
-    setFormMode('edit');
     setSelectedAdvisor(advisor);
-    setIsFormModalOpen(true);
+    setIsEditModalOpen(true);
   };
 
   const handleViewProfile = (advisor: Advisor) => {
@@ -50,16 +42,14 @@ export const Advisors: React.FC = () => {
     setIsDetailModalOpen(true);
   };
 
-  const handleFormSubmit = async (data: Partial<Advisor>) => {
-    if (formMode === 'create') {
-      await createAdvisor(data);
-    } else if (selectedAdvisor) {
+  const handleEditSubmit = async (data: Partial<Advisor>) => {
+    if (selectedAdvisor) {
       await updateAdvisor(selectedAdvisor.id, data);
     }
   };
 
   const closeModals = () => {
-    setIsFormModalOpen(false);
+    setIsEditModalOpen(false);
     setIsDetailModalOpen(false);
     setSelectedAdvisor(null);
   };
@@ -87,11 +77,6 @@ export const Advisors: React.FC = () => {
             <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">Advisors</h1>
             <p className="text-sm md:text-base text-gray-600">Manage your advisor network</p>
           </div>
-          <Button onClick={handleAddAdvisor} className="flex items-center space-x-1 md:space-x-2 px-3 md:px-6">
-            <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">Add Advisor</span>
-            <span className="sm:hidden">Add</span>
-          </Button>
         </div>
 
         {/* Search and Filter Bar */}
@@ -130,14 +115,9 @@ export const Advisors: React.FC = () => {
           <p className="text-sm md:text-base text-gray-500 mb-6">
             {searchTerm || filterSpecialization 
               ? 'No advisors match your search criteria' 
-              : 'Get started by adding your first advisor'
+              : 'No advisors are currently available in the system'
             }
           </p>
-          <Button onClick={handleAddAdvisor} className="w-full sm:w-auto">
-            <Plus className="w-4 h-4 mr-2" />
-            <span className="hidden sm:inline">Add Advisor</span>
-            <span className="sm:hidden">Add</span>
-          </Button>
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
@@ -183,11 +163,11 @@ export const Advisors: React.FC = () => {
 
       {/* Modals */}
       <AdvisorFormModal
-        isOpen={isFormModalOpen}
+        isOpen={isEditModalOpen}
         onClose={closeModals}
-        onSubmit={handleFormSubmit}
+        onSubmit={handleEditSubmit}
         advisor={selectedAdvisor}
-        mode={formMode}
+        mode="edit"
       />
 
       <AdvisorDetailModal

@@ -70,53 +70,6 @@ export const useAdvisors = (searchTerm?: string, filterSpecialization?: string) 
       throw err;
     }
   };
-  const createAdvisor = async (advisorData: Partial<Advisor>): Promise<void> => {
-    try {
-      const { data, error } = await supabase
-        .from('advisors')
-        .insert({
-          ...advisorData,
-          is_active: true
-        })
-        .select()
-        .single();
-      
-      if (error) {
-        throw error;
-      }
-      
-      // Also create a user profile if email is provided and not exists
-      if (advisorData.email) {
-        try {
-          // Check if user profile exists
-          const { data: existingProfile } = await supabase
-            .from('user_profiles')
-            .select('id')
-            .eq('email', advisorData.email)
-            .single();
-          
-          if (!existingProfile) {
-            // Create user profile for this advisor
-            await supabase
-              .from('user_profiles')
-              .insert({
-                email: advisorData.email,
-                full_name: advisorData.name || '',
-                role: 'advisor'
-              });
-          }
-        } catch (profileError) {
-          console.warn('Could not create user profile:', profileError);
-          // Continue anyway as the advisor was created successfully
-        }
-      }
-      
-      await fetchAdvisors();
-    } catch (err) {
-      console.error('Error creating advisor:', err);
-      throw err;
-    }
-  };
 
   const updateAdvisor = async (advisorId: string, advisorData: Partial<Advisor>): Promise<void> => {
     try {
@@ -182,7 +135,6 @@ export const useAdvisors = (searchTerm?: string, filterSpecialization?: string) 
     error,
     fetchAdvisors,
     fetchAdvisorProfile,
-    createAdvisor,
     updateAdvisor,
     deleteAdvisor,
     getAdvisorById,
