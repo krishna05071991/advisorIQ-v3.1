@@ -2,6 +2,7 @@ import React from 'react';
 import { Recommendation } from '../../types';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
+import { StarRating } from '../ui/StarRating';
 import { X, TrendingUp, Target, BarChart3, Calendar, User, Edit } from 'lucide-react';
 
 interface RecommendationDetailModalProps {
@@ -135,9 +136,9 @@ export const RecommendationDetailModal: React.FC<RecommendationDetailModalProps>
                       <div>
                         <p className="text-sm font-medium text-gray-900">Confidence</p>
                         <div className="flex items-center space-x-2">
-                          <p className="text-lg font-semibold text-gray-900">{recommendation.confidence_level}%</p>
-                          <span className={`text-xs font-medium ${confidenceInfo.color}`}>
-                            {confidenceInfo.label}
+                          <StarRating rating={recommendation.confidence_level} size="md" />
+                          <span className="text-sm font-medium text-gray-900">
+                            ({recommendation.confidence_level}/5)
                           </span>
                         </div>
                       </div>

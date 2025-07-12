@@ -7,6 +7,7 @@ import { Recommendation } from '../types';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
+import { StarRating } from '../components/ui/StarRating';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { TrendingUp, Plus, Search, Filter } from 'lucide-react';
 
@@ -176,7 +177,10 @@ export const Recommendations: React.FC = () => {
                     {recommendation.reasoning}
                   </p>
                   <div className="flex flex-wrap items-center gap-2 md:gap-4 text-xs text-gray-500">
-                    <span className="whitespace-nowrap">Confidence: {recommendation.confidence_level}%</span>
+                    <div className="flex items-center space-x-1">
+                      <span className="whitespace-nowrap">Confidence:</span>
+                      <StarRating rating={recommendation.confidence_level} size="sm" />
+                    </div>
                     <span className="whitespace-nowrap">{new Date(recommendation.created_at).toLocaleDateString()}</span>
                   </div>
                 </div>

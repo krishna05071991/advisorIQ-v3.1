@@ -7,6 +7,7 @@ import { Recommendation } from '../types';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
+import { StarRating } from '../components/ui/StarRating';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { TrendingUp, Plus, Search } from 'lucide-react';
 
@@ -152,7 +153,11 @@ export const MyRecommendations: React.FC = () => {
                       </span>
                     </div>
                     <p className="text-xs md:text-sm text-gray-600 mb-2">
-                      Target: ${recommendation.target_price} • Confidence: {recommendation.confidence_level}%
+                      Target: ${recommendation.target_price}
+                    </p>
+                    <div className="flex items-center space-x-2 mb-2">
+                      <span className="text-xs md:text-sm text-gray-600">Confidence:</span>
+                      <StarRating rating={recommendation.confidence_level} size="sm" />
                     </p>
                     <p className="text-xs md:text-sm text-gray-700 mb-3 md:mb-4 line-clamp-2">
                       {recommendation.reasoning}
