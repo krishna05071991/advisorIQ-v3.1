@@ -3,9 +3,16 @@ import { PerformanceMetrics, DashboardStats, RecentActivity } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../supabase';
 
+interface TimeSeriesData {
+  date: string;
+  recommendations: number;
+  successRate: number;
+}
+
 export const usePerformanceMetrics = (advisorId?: string) => {
   const [metrics, setMetrics] = useState<PerformanceMetrics[]>([]);
   const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);
+  const [timeSeriesData, setTimeSeriesData] = useState<TimeSeriesData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
@@ -25,6 +32,7 @@ export const usePerformanceMetrics = (advisorId?: string) => {
       } else {
         // Fetch dashboard stats (for operations role)
         await fetchDashboardStats();
+        await fetchTimeSeriesData();
       }
     } catch (err) {
       console.error('Error fetching performance metrics:', err);
@@ -51,6 +59,45 @@ export const usePerformanceMetrics = (advisorId?: string) => {
     } catch (err) {
       console.error('Error fetching advisor metrics:', err);
       setMetrics([]);
+    }
+  };
+
+  const fetchTimeSeriesData = async () => {
+    try {
+      // Fetch recommendations grouped by month for the last 12 months
+      const { data: monthlyData, error } = await supabase
+        .from('recommendations')
+        .select('created_at, status')
+        .gte('created_at', new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString())
+        .order('created_at');
+
+      if (error) throw error;
+
+      // Group data by month
+      const groupedData: { [key: string]: { total: number; successful: number } } = {};
+      
+      (monthlyData || []).forEach(rec => {
+        const month = new Date(rec.created_at).toISOString().slice(0, 7); // YYYY-MM format
+        if (!groupedData[month]) {
+          groupedData[month] = { total: 0, successful: 0 };
+        }
+        groupedData[month].total++;
+        if (rec.status === 'successful') {
+          groupedData[month].successful++;
+        }
+      });
+
+      // Convert to array format for charts
+      const chartData = Object.entries(groupedData).map(([month, data]) => ({
+        date: new Date(month + '-01').toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+        recommendations: data.total,
+        successRate: data.total > 0 ? (data.successful / data.total) * 100 : 0
+      }));
+
+      setTimeSeriesData(chartData);
+    } catch (err) {
+      console.error('Error fetching time series data:', err);
+      setTimeSeriesData([]);
     }
   };
 
@@ -142,6 +189,7 @@ export const usePerformanceMetrics = (advisorId?: string) => {
   return {
     metrics,
     dashboardStats,
+    timeSeriesData,
     loading,
     error,
     fetchMetrics,
