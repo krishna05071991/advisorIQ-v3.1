@@ -225,11 +225,3 @@ export const Navigation: React.FC = () => {
     </>
   );
 };
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </nav>
-  );
-};
