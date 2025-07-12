@@ -63,20 +63,21 @@ export const MyRecommendations: React.FC = () => {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">My Recommendations</h1>
-            <p className="text-gray-600">Track your investment recommendations</p>
+            <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">My Recommendations</h1>
+            <p className="text-sm md:text-base text-gray-600">Track your investment recommendations</p>
           </div>
-          <Button className="flex items-center space-x-2">
+          <Button className="flex items-center space-x-1 md:space-x-2 px-3 md:px-6">
             <Plus className="w-4 h-4" />
-            <span>Add Recommendation</span>
+            <span className="hidden sm:inline">Add Recommendation</span>
+            <span className="sm:hidden">Add</span>
           </Button>
         </div>
 
         {/* Search Bar */}
-        <div className="relative mb-6">
+        <div className="relative mb-4 md:mb-6">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
           <Input
-            placeholder="Search your recommendations..."
+            placeholder={window.innerWidth < 640 ? "Search..." : "Search your recommendations..."}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
@@ -86,52 +87,54 @@ export const MyRecommendations: React.FC = () => {
 
       {/* Recommendations List */}
       {filteredRecommendations.length === 0 ? (
-        <Card className="p-12 text-center" gradient>
+        <Card className="p-6 md:p-12 text-center" variant="glass">
           <TrendingUp className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">No recommendations found</h3>
-          <p className="text-gray-500 mb-6">
+          <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-2">No recommendations found</h3>
+          <p className="text-sm md:text-base text-gray-500 mb-6">
             {searchTerm 
               ? 'No recommendations match your search' 
               : 'Get started by adding your first recommendation'
             }
           </p>
-          <Button>
+          <Button className="w-full sm:w-auto">
             <Plus className="w-4 h-4 mr-2" />
-            Add Recommendation
+            <span className="hidden sm:inline">Add Recommendation</span>
+            <span className="sm:hidden">Add</span>
           </Button>
         </Card>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3 md:space-y-4">
           {filteredRecommendations.map((recommendation) => (
-            <Card key={recommendation.id} className="p-6" gradient>
-              <div className="flex items-start justify-between">
+            <Card key={recommendation.id} className="p-4 md:p-6" variant="glass">
+              <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                 <div className="flex-1">
-                  <div className="flex items-center space-x-3 mb-2">
-                    <h3 className="text-lg font-semibold text-gray-900">
+                  <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-2">
+                    <h3 className="text-base md:text-lg font-semibold text-gray-900">
                       {recommendation.stock_symbol}
                     </h3>
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(recommendation.status)}`}>
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap ${getStatusColor(recommendation.status)}`}>
                       {recommendation.status}
                     </span>
-                    <span className="text-sm font-medium text-gray-600">
+                    <span className="text-xs md:text-sm font-medium text-gray-600 whitespace-nowrap">
                       {recommendation.action.toUpperCase()}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-600 mb-2">
+                  <p className="text-xs md:text-sm text-gray-600 mb-2">
                     Target: ${recommendation.target_price} • Confidence: {recommendation.confidence_level}%
                   </p>
-                  <p className="text-sm text-gray-700 mb-4">
+                  <p className="text-xs md:text-sm text-gray-700 mb-3 md:mb-4 line-clamp-2">
                     {recommendation.reasoning}
                   </p>
-                  <div className="flex items-center space-x-4 text-xs text-gray-500">
-                    <span>Created: {new Date(recommendation.created_at).toLocaleDateString()}</span>
+                  <div className="text-xs text-gray-500">
+                    <span className="whitespace-nowrap">Created: {new Date(recommendation.created_at).toLocaleDateString()}</span>
                   </div>
                 </div>
-                <div className="flex space-x-2">
-                  <Button size="sm" variant="secondary">
-                    Update Status
+                <div className="flex flex-row md:flex-col gap-2 self-start md:self-auto">
+                  <Button size="sm" variant="secondary" className="flex-1 md:flex-none whitespace-nowrap">
+                    <span className="hidden sm:inline">Update Status</span>
+                    <span className="sm:hidden">Update</span>
                   </Button>
-                  <Button size="sm" variant="ghost">
+                  <Button size="sm" variant="ghost" className="flex-1 md:flex-none">
                     Edit
                   </Button>
                 </div>

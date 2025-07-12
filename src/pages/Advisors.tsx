@@ -44,34 +44,35 @@ export const Advisors: React.FC = () => {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Advisors</h1>
-            <p className="text-gray-600">Manage your advisor network</p>
+            <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">Advisors</h1>
+            <p className="text-sm md:text-base text-gray-600">Manage your advisor network</p>
           </div>
-          <Button className="flex items-center space-x-2">
+          <Button className="flex items-center space-x-1 md:space-x-2 px-3 md:px-6">
             <Plus className="w-4 h-4" />
-            <span>Add Advisor</span>
+            <span className="hidden sm:inline">Add Advisor</span>
+            <span className="sm:hidden">Add</span>
           </Button>
         </div>
 
         {/* Search and Filter Bar */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <div className="flex flex-col gap-3 md:flex-row md:gap-4 mb-6">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
             <Input
-              placeholder="Search advisors..."
+              placeholder={window.innerWidth < 640 ? "Search..." : "Search advisors..."}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
             />
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 flex-shrink-0">
             <Filter className="w-4 h-4 text-gray-400" />
             <select
               value={filterSpecialization}
               onChange={(e) => setFilterSpecialization(e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="border border-gray-300 rounded-lg px-2 md:px-3 py-2 text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0"
             >
-              <option value="">All Specializations</option>
+              <option value="">All Types</option>
               <option value="Equities">Equities</option>
               <option value="Fixed Income">Fixed Income</option>
               <option value="Derivatives">Derivatives</option>
@@ -83,41 +84,43 @@ export const Advisors: React.FC = () => {
 
       {/* Advisors Grid */}
       {filteredAdvisors.length === 0 ? (
-        <Card className="p-12 text-center" gradient>
+        <Card className="p-6 md:p-12 text-center" variant="glass">
           <Users className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">No advisors found</h3>
-          <p className="text-gray-500 mb-6">
+          <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-2">No advisors found</h3>
+          <p className="text-sm md:text-base text-gray-500 mb-6">
             {searchTerm || filterSpecialization 
               ? 'No advisors match your search criteria' 
               : 'Get started by adding your first advisor'
             }
           </p>
-          <Button>
+          <Button className="w-full sm:w-auto">
             <Plus className="w-4 h-4 mr-2" />
-            Add Advisor
+            <span className="hidden sm:inline">Add Advisor</span>
+            <span className="sm:hidden">Add</span>
           </Button>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {filteredAdvisors.map((advisor, index) => (
-            <Card key={advisor.id} className="p-6" gradient>
-              <div className="flex items-start space-x-4">
+            <Card key={advisor.id} className="p-4 md:p-6" variant="glass">
+              <div className="flex items-start space-x-3 md:space-x-4">
                 <img 
                   src={getAvatarUrl(index)}
                   alt={advisor.name}
-                  className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm flex-shrink-0"
+                  className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover border-2 border-white shadow-sm flex-shrink-0"
                 />
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                  <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-1 truncate">
                     {advisor.name}
                   </h3>
-                  <p className="text-sm text-gray-600 mb-2">{advisor.specialization}</p>
-                  <p className="text-sm text-gray-500 mb-4">{advisor.email}</p>
-                  <div className="flex space-x-2">
-                    <Button size="sm" variant="secondary">
-                      View Profile
+                  <p className="text-xs md:text-sm text-gray-600 mb-1 md:mb-2 truncate">{advisor.specialization}</p>
+                  <p className="text-xs md:text-sm text-gray-500 mb-3 md:mb-4 truncate">{advisor.email}</p>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Button size="sm" variant="secondary" className="flex-1 sm:flex-none">
+                      <span className="hidden sm:inline">View Profile</span>
+                      <span className="sm:hidden">View</span>
                     </Button>
-                    <Button size="sm" variant="ghost">
+                    <Button size="sm" variant="ghost" className="flex-1 sm:flex-none">
                       Edit
                     </Button>
                   </div>
