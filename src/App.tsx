@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LoginForm } from './components/auth/LoginForm';
 import { Navigation } from './components/layout/Navigation';
-import { MobileNavigation } from './components/layout/MobileNavigation';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
 
 // Pages
@@ -34,10 +33,9 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
-      <main className="pb-16 md:pb-0">
+      <main>
         {children}
       </main>
-      <MobileNavigation />
     </div>
   );
 };
