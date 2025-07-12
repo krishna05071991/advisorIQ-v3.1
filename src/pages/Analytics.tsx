@@ -25,15 +25,15 @@ export const Analytics: React.FC = () => {
 
       {/* Performance Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8 mb-6 md:mb-8">
-        <Card className="p-4 md:p-6 lg:col-span-2" variant="glass">
+        <Card className="p-3 sm:p-4 md:p-6 lg:col-span-2" variant="glass">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-base md:text-lg font-semibold text-gray-900">Network Performance</h3>
             <BarChart3 className="w-5 h-5 text-gray-400" />
           </div>
           {timeSeriesData.length > 0 ? (
-            <div className="h-48 md:h-64">
+            <div className="h-48 md:h-64 w-full overflow-hidden">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={timeSeriesData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                <LineChart data={timeSeriesData} margin={{ top: 10, right: 10, left: 0, bottom: 10 }}>
                   <defs>
                     <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.8}/>
@@ -54,29 +54,30 @@ export const Analytics: React.FC = () => {
                     dataKey="date" 
                     stroke="#64748b"
                     strokeOpacity={0.8}
-                    fontSize={12}
-                    tickMargin={8}
+                    fontSize={10}
+                    tickMargin={4}
                     axisLine={false}
                     tickLine={false}
+                    interval="preserveStartEnd"
                   />
                   <YAxis 
                     yAxisId="left"
                     stroke="#64748b"
                     strokeOpacity={0.8}
-                    fontSize={12}
+                    fontSize={10}
                     axisLine={false}
                     tickLine={false}
-                    width={40}
+                    width={25}
                   />
                   <YAxis 
                     yAxisId="right" 
                     orientation="right"
                     stroke="#64748b"
                     strokeOpacity={0.8}
-                    fontSize={12}
+                    fontSize={10}
                     axisLine={false}
                     tickLine={false}
-                    width={40}
+                    width={25}
                   />
                   <Tooltip 
                     contentStyle={{ 
@@ -85,7 +86,7 @@ export const Analytics: React.FC = () => {
                       border: 'none',
                       boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
                       backdropFilter: 'blur(20px)',
-                      fontSize: '14px',
+                      fontSize: '12px',
                       fontWeight: '300'
                     }}
                     labelStyle={{ color: '#1e293b', fontWeight: '500' }}
@@ -99,7 +100,7 @@ export const Analytics: React.FC = () => {
                   <Legend 
                     wrapperStyle={{ 
                       paddingTop: '20px',
-                      fontSize: '14px',
+                      fontSize: '12px',
                       fontWeight: '300'
                     }}
                   />
@@ -109,7 +110,7 @@ export const Analytics: React.FC = () => {
                     fill="url(#barGradient)"
                     name="Recommendations"
                     radius={[6, 6, 0, 0]}
-                    barSize={32}
+                    barSize={24}
                     opacity={0.9}
                   />
                   <Line 
@@ -119,9 +120,9 @@ export const Analytics: React.FC = () => {
                     stroke="url(#lineGradient)"
                     strokeWidth={4}
                     name="Success Rate (%)"
-                    dot={{ fill: '#10b981', strokeWidth: 0, r: 5, fillOpacity: 0.8 }}
+                    dot={{ fill: '#10b981', strokeWidth: 0, r: 3, fillOpacity: 0.8 }}
                     activeDot={{ 
-                      r: 8, 
+                      r: 6, 
                       strokeWidth: 3, 
                       stroke: '#10b981', 
                       fill: '#ffffff',
@@ -144,7 +145,7 @@ export const Analytics: React.FC = () => {
           )}
         </Card>
 
-        <Card className="p-4 md:p-6" variant="glass">
+        <Card className="p-3 sm:p-4 md:p-6" variant="glass">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-base md:text-lg font-semibold text-gray-900">Key Metrics</h3>
             <Target className="w-5 h-5 text-gray-400" />
@@ -173,7 +174,7 @@ export const Analytics: React.FC = () => {
       </div>
 
       {/* Performance Rankings */}
-      <Card className="p-4 md:p-6" variant="glass">
+      <Card className="p-3 sm:p-4 md:p-6" variant="glass">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-base md:text-lg font-semibold text-gray-900">
             <span className="hidden sm:inline">Advisor Performance Rankings</span>
@@ -188,22 +189,22 @@ export const Analytics: React.FC = () => {
               const rankIcon = index < 3 ? rankIcons[index] : `${index + 1}.`;
               
               return (
-                <div key={performer.advisor_id} className="flex items-center justify-between p-3 bg-white/30 backdrop-blur-sm rounded-xl">
+                <div key={performer.advisor_id} className="flex items-center justify-between p-2 sm:p-3 bg-white/30 backdrop-blur-sm rounded-xl">
                   <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-sm font-semibold">
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-xs sm:text-sm font-semibold">
                       {rankIcon}
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">
                         {performer.advisor?.name || 'Unknown Advisor'}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-500 truncate">
                         {performer.total_recommendations} recommendations
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-semibold text-gray-900">
+                    <p className="text-xs sm:text-sm font-semibold text-gray-900">
                       {performer.success_rate.toFixed(1)}%
                     </p>
                     <p className="text-xs text-gray-500">

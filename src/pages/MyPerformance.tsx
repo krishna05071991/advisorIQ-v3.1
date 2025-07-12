@@ -102,15 +102,15 @@ export const MyPerformance: React.FC = () => {
       </div>
 
       {/* Performance Chart */}
-      <Card className="p-4 md:p-6 mb-6 md:mb-8" variant="glass">
+      <Card className="p-3 sm:p-4 md:p-6 mb-6 md:mb-8" variant="glass">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-base md:text-lg font-semibold text-gray-900">Performance Trends</h3>
           <BarChart3 className="w-5 h-5 text-gray-400" />
         </div>
         {timeSeriesData.length > 0 ? (
-          <div className="h-48 md:h-64">
+          <div className="h-48 md:h-64 w-full overflow-hidden">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={timeSeriesData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+              <LineChart data={timeSeriesData} margin={{ top: 10, right: 10, left: 0, bottom: 10 }}>
                 <defs>
                   <linearGradient id="performanceBarGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.8}/>
@@ -131,29 +131,30 @@ export const MyPerformance: React.FC = () => {
                   dataKey="date" 
                   stroke="#64748b"
                   strokeOpacity={0.8}
-                  fontSize={12}
-                  tickMargin={8}
+                  fontSize={10}
+                  tickMargin={4}
                   axisLine={false}
                   tickLine={false}
+                  interval="preserveStartEnd"
                 />
                 <YAxis 
                   yAxisId="left"
                   stroke="#64748b"
                   strokeOpacity={0.8}
-                  fontSize={12}
+                  fontSize={10}
                   axisLine={false}
                   tickLine={false}
-                  width={40}
+                  width={25}
                 />
                 <YAxis 
                   yAxisId="right" 
                   orientation="right"
                   stroke="#64748b"
                   strokeOpacity={0.8}
-                  fontSize={12}
+                  fontSize={10}
                   axisLine={false}
                   tickLine={false}
-                  width={40}
+                  width={25}
                 />
                 <Tooltip 
                   contentStyle={{ 
@@ -162,7 +163,7 @@ export const MyPerformance: React.FC = () => {
                     border: 'none',
                     boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
                     backdropFilter: 'blur(20px)',
-                    fontSize: '14px',
+                    fontSize: '12px',
                     fontWeight: '300'
                   }}
                   labelStyle={{ color: '#1e293b', fontWeight: '500' }}
@@ -176,7 +177,7 @@ export const MyPerformance: React.FC = () => {
                 <Legend 
                   wrapperStyle={{ 
                     paddingTop: '20px',
-                    fontSize: '14px',
+                    fontSize: '12px',
                     fontWeight: '300'
                   }}
                 />
@@ -187,9 +188,9 @@ export const MyPerformance: React.FC = () => {
                   stroke="url(#performanceBarGradient)"
                   strokeWidth={4}
                   name="Recommendations"
-                  dot={{ fill: '#3b82f6', strokeWidth: 0, r: 5, fillOpacity: 0.8 }}
+                  dot={{ fill: '#3b82f6', strokeWidth: 0, r: 3, fillOpacity: 0.8 }}
                   activeDot={{ 
-                    r: 8, 
+                    r: 6, 
                     strokeWidth: 3, 
                     stroke: '#3b82f6', 
                     fill: '#ffffff',
@@ -204,9 +205,9 @@ export const MyPerformance: React.FC = () => {
                   stroke="url(#performanceLineGradient)"
                   strokeWidth={4}
                   name="Success Rate (%)"
-                  dot={{ fill: '#10b981', strokeWidth: 0, r: 5, fillOpacity: 0.8 }}
+                  dot={{ fill: '#10b981', strokeWidth: 0, r: 3, fillOpacity: 0.8 }}
                   activeDot={{ 
-                    r: 8, 
+                    r: 6, 
                     strokeWidth: 3, 
                     stroke: '#10b981', 
                     fill: '#ffffff',
@@ -229,7 +230,7 @@ export const MyPerformance: React.FC = () => {
       </Card>
 
       {/* Performance Breakdown */}
-      <Card className="p-4 md:p-6" variant="glass">
+      <Card className="p-3 sm:p-4 md:p-6" variant="glass">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-base md:text-lg font-semibold text-gray-900">Performance Breakdown</h3>
           <Award className="w-5 h-5 text-gray-400" />
