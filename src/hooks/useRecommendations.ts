@@ -3,7 +3,7 @@ import { Recommendation } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../supabase';
 
-export const useRecommendations = (advisorId?: string) => {
+export const useRecommendations = (advisorId?: string, searchTerm?: string, filterStatus?: string) => {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -11,7 +11,7 @@ export const useRecommendations = (advisorId?: string) => {
 
   useEffect(() => {
     fetchRecommendations();
-  }, [advisorId, user]);
+  }, [advisorId, user, searchTerm, filterStatus]);
 
   const fetchRecommendations = async () => {
     try {
@@ -29,6 +29,16 @@ export const useRecommendations = (advisorId?: string) => {
       // If advisorId is provided, filter by advisor
       if (advisorId) {
         query = query.eq('advisor_id', advisorId);
+      }
+
+      // Apply search filter
+      if (searchTerm && searchTerm.trim()) {
+        query = query.or(`stock_symbol.ilike.%${searchTerm}%,reasoning.ilike.%${searchTerm}%`);
+      }
+
+      // Apply status filter
+      if (filterStatus && filterStatus.trim()) {
+        query = query.eq('status', filterStatus);
       }
 
       const { data, error } = await query;
@@ -64,7 +74,10 @@ export const useRecommendations = (advisorId?: string) => {
     try {
       const { error } = await supabase
         .from('recommendations')
-        .update(recommendationData)
+        .update({
+          ...recommendationData,
+          updated_at: new Date().toISOString()
+        })
         .eq('id', id);
 
       if (error) throw error;
@@ -92,6 +105,26 @@ export const useRecommendations = (advisorId?: string) => {
     }
   };
 
+  const getRecommendationById = async (id: string): Promise<Recommendation | null> => {
+    try {
+      const { data, error } = await supabase
+        .from('recommendations')
+        .select(`
+          *,
+          advisor:advisors(*)
+        `)
+        .eq('id', id)
+        .single();
+
+      if (error) throw error;
+
+      return data;
+    } catch (err) {
+      console.error('Error fetching recommendation by ID:', err);
+      return null;
+    }
+  };
+
   return {
     recommendations,
     loading,
@@ -100,5 +133,6 @@ export const useRecommendations = (advisorId?: string) => {
     createRecommendation,
     updateRecommendation,
     deleteRecommendation,
+    getRecommendationById,
   };
 };

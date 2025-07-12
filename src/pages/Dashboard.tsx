@@ -37,10 +37,10 @@ export const Dashboard: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+        <h1 className="text-3xl font-extralight text-slate-900 mb-2 tracking-wide">
           {user?.role === 'operations' ? 'Operations Dashboard' : 'Advisor Dashboard'}
         </h1>
-        <p className="text-gray-600">
+        <p className="text-slate-600 font-light">
           {user?.role === 'operations' 
             ? 'Overview of your advisor network and performance metrics' 
             : 'Your personal performance and recommendation tracking'
