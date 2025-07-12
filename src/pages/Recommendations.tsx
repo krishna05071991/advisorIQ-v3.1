@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import { useRecommendations } from '../hooks/useRecommendations';
 import { RecommendationFormModal } from '../components/modals/RecommendationFormModal';
 import { RecommendationDetailModal } from '../components/modals/RecommendationDetailModal';
@@ -10,6 +11,7 @@ import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { TrendingUp, Plus, Search, Filter } from 'lucide-react';
 
 export const Recommendations: React.FC = () => {
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -82,13 +84,20 @@ export const Recommendations: React.FC = () => {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">Recommendations</h1>
-            <p className="text-sm md:text-base text-gray-600">Track all investment recommendations</p>
+            <p className="text-sm md:text-base text-gray-600">
+              {user?.role === 'operations' 
+                ? 'Review and manage investment recommendations' 
+                : 'Track all investment recommendations'
+              }
+            </p>
           </div>
-          <Button onClick={handleAddRecommendation} className="flex items-center space-x-1 md:space-x-2 px-3 md:px-6">
-            <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">Add Recommendation</span>
-            <span className="sm:hidden">Add</span>
-          </Button>
+          {user?.role === 'advisor' && (
+            <Button onClick={handleAddRecommendation} className="flex items-center space-x-1 md:space-x-2 px-3 md:px-6">
+              <Plus className="w-4 h-4" />
+              <span className="hidden sm:inline">Add Recommendation</span>
+              <span className="sm:hidden">Add</span>
+            </Button>
+          )}
         </div>
 
         {/* Search and Filter Bar */}
@@ -122,18 +131,24 @@ export const Recommendations: React.FC = () => {
       {recommendations.length === 0 ? (
         <Card className="p-6 md:p-12 text-center" variant="glass">
           <TrendingUp className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-          <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-2">No recommendations found</h3>
+          <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-2">
+            {searchTerm || filterStatus ? 'No recommendations found' : 'No recommendations available'}
+          </h3>
           <p className="text-sm md:text-base text-gray-500 mb-6">
-            {searchTerm || filterStatus 
-              ? 'No recommendations match your search criteria' 
-              : 'Get started by adding your first recommendation'
+            {searchTerm || filterStatus
+              ? 'No recommendations match your search criteria'
+              : user?.role === 'operations'
+                ? 'No recommendations have been created by advisors yet'
+                : 'Get started by adding your first recommendation'
             }
           </p>
-          <Button onClick={handleAddRecommendation} className="w-full sm:w-auto">
-            <Plus className="w-4 h-4 mr-2" />
-            <span className="hidden sm:inline">Add Recommendation</span>
-            <span className="sm:hidden">Add</span>
-          </Button>
+          {user?.role === 'advisor' && !searchTerm && !filterStatus && (
+            <Button onClick={handleAddRecommendation} className="w-full sm:w-auto">
+              <Plus className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Add Recommendation</span>
+              <span className="sm:hidden">Add</span>
+            </Button>
+          )}
         </Card>
       ) : (
         <div className="space-y-3 md:space-y-4">
