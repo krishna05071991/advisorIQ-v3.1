@@ -414,12 +414,15 @@ export const Search: React.FC = () => {
             <span className="hidden sm:inline">Search</span>
             <span className="sm:hidden">Search</span>
           </Button>
-          <Button variant="secondary" className="flex items-center justify-center space-x-2 flex-1 sm:flex-none">
+          <Button 
+            variant="secondary" 
+            className="flex items-center justify-center space-x-2 flex-1 sm:flex-none"
+            onClick={() => setIsAdvancedModalOpen(true)}
+          >
             <Filter className="w-4 h-4" />
             <span className="hidden sm:inline">Advanced Filters</span>
             <span className="sm:hidden">Filters</span>
           </Button>
-            onClick={() => setIsAdvancedModalOpen(true)}
           <Button 
             variant="ghost" 
             className="flex items-center justify-center space-x-2 flex-1 sm:flex-none"
