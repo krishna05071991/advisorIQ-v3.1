@@ -158,7 +158,7 @@ export const MyRecommendations: React.FC = () => {
                     <div className="flex items-center space-x-2 mb-2">
                       <span className="text-xs md:text-sm text-gray-600">Confidence:</span>
                       <StarRating rating={recommendation.confidence_level} size="sm" />
-                    </p>
+                    </div>
                     <p className="text-xs md:text-sm text-gray-700 mb-3 md:mb-4 line-clamp-2">
                       {recommendation.reasoning}
                     </p>
