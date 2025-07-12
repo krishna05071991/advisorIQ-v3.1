@@ -31,7 +31,7 @@ export const RecommendationFormModal: React.FC<RecommendationFormModalProps> = (
     action: 'buy' as 'buy' | 'sell' | 'hold',
     target_price: '',
     reasoning: '',
-    confidence_level: 75,
+    confidence_level: 3,
     status: 'ongoing' as 'ongoing' | 'successful' | 'unsuccessful',
   });
 
@@ -43,7 +43,7 @@ export const RecommendationFormModal: React.FC<RecommendationFormModalProps> = (
         action: recommendation.action || 'buy',
         target_price: recommendation.target_price?.toString() || '',
         reasoning: recommendation.reasoning || '',
-        confidence_level: recommendation.confidence_level || 75,
+        confidence_level: recommendation.confidence_level || 3,
         status: recommendation.status || 'ongoing',
       });
     } else {
@@ -53,7 +53,7 @@ export const RecommendationFormModal: React.FC<RecommendationFormModalProps> = (
         action: 'buy',
         target_price: '',
         reasoning: '',
-        confidence_level: 75,
+        confidence_level: 3,
         status: 'ongoing',
       });
     }
@@ -240,21 +240,21 @@ export const RecommendationFormModal: React.FC<RecommendationFormModalProps> = (
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Reasoning *
+                Confidence Level: {formData.confidence_level}/5
               </label>
               <textarea
                 value={formData.reasoning}
                 onChange={(e) => handleInputChange('reasoning', e.target.value)}
-                placeholder="Provide detailed reasoning for this recommendation"
+                max="5"
                 rows={4}
                 className="w-full border border-gray-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 metallic-input"
                 required
                 disabled={loading}
               />
             </div>
-
-            <div className="flex flex-col-reverse sm:flex-row gap-3 pt-6">
-              <Button
+                <span>1</span>
+                <span>3</span>
+                <span>5</span>
                 type="button"
                 variant="secondary"
                 onClick={onClose}
