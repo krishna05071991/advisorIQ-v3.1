@@ -96,7 +96,7 @@ export const Dashboard: React.FC = () => {
             <RecentActivity activities={activityToDisplay} />
           </div>
           <div>
-            <TopPerformers performers={networkDashboardStats?.top_performers || []} />
+            <TopPerformers performers={dashboardStats?.top_performers || []} />
           </div>
         </div>
       ) : (
