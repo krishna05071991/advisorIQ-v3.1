@@ -203,21 +203,21 @@ export const RecommendationFormModal: React.FC<RecommendationFormModalProps> = (
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Confidence Level: {formData.confidence_level}%
+                  Confidence Level: {formData.confidence_level}/5
                 </label>
                 <input
                   type="range"
                   min="1"
-                  max="100"
+                  max="5"
                   value={formData.confidence_level}
                   onChange={(e) => handleInputChange('confidence_level', parseInt(e.target.value))}
                   className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
                   disabled={loading}
                 />
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
-                  <span>1%</span>
-                  <span>50%</span>
-                  <span>100%</span>
+                  <span>1</span>
+                  <span>3</span>
+                  <span>5</span>
                 </div>
               </div>
 
