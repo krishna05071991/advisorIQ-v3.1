@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getTimeframeOptions } from '../../utils/timeframe';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -12,6 +13,7 @@ export interface AdvancedFilters {
   specialization: string;
   action: string;
   status: string;
+  timeframe: number | '';
 }
 
 interface AdvancedFiltersModalProps {
@@ -34,7 +36,8 @@ export const AdvancedFiltersModal: React.FC<AdvancedFiltersModalProps> = ({
     confidenceMax: 100,
     specialization: '',
     action: '',
-    status: ''
+    status: '',
+    timeframe: ''
   });
 
   const handleApply = () => {
@@ -50,11 +53,13 @@ export const AdvancedFiltersModal: React.FC<AdvancedFiltersModalProps> = ({
       confidenceMax: 100,
       specialization: '',
       action: '',
-      status: ''
+      status: '',
+      timeframe: ''
     });
   };
 
   if (!isOpen) return null;
+  const timeframeOptions = getTimeframeOptions();
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -164,6 +169,22 @@ export const AdvancedFiltersModal: React.FC<AdvancedFiltersModalProps> = ({
                       <option value="ongoing">Ongoing</option>
                       <option value="successful">Successful</option>
                       <option value="unsuccessful">Unsuccessful</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Timeframe</label>
+                    <select
+                      value={filters.timeframe}
+                      onChange={(e) => setFilters(prev => ({ ...prev, timeframe: e.target.value ? parseInt(e.target.value) : '' }))}
+                      className="w-full border border-gray-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 metallic-input"
+                    >
+                      <option value="">All Timeframes</option>
+                      {timeframeOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>

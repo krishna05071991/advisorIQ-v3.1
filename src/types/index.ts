@@ -36,6 +36,7 @@ export interface Recommendation {
   target_price: number;
   reasoning: string;
   confidence_level: number;
+  timeframe: number;
   status: 'ongoing' | 'successful' | 'unsuccessful';
   created_at: string;
   updated_at: string;

@@ -2,6 +2,7 @@ import { supabase } from '../supabase';
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useRecommendations } from '../hooks/useRecommendations';
+import { getTimeframeLabel } from '../utils/timeframe';
 import { RecommendationFormModal } from '../components/modals/RecommendationFormModal';
 import { Recommendation } from '../types';
 import { Card } from '../components/ui/Card';
@@ -153,7 +154,7 @@ export const MyRecommendations: React.FC = () => {
                       </span>
                     </div>
                     <p className="text-xs md:text-sm text-gray-600 mb-2">
-                      Target: ${recommendation.target_price}
+                      Target: ${recommendation.target_price} • {getTimeframeLabel(recommendation.timeframe)}
                     </p>
                     <div className="flex items-center space-x-2 mb-2">
                       <span className="text-xs md:text-sm text-gray-600">Confidence:</span>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Recommendation } from '../../types';
+import { getTimeframeLabel } from '../../utils/timeframe';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { StarRating } from '../ui/StarRating';
@@ -221,6 +222,10 @@ export const RecommendationDetailModal: React.FC<RecommendationDetailModalProps>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600">Current Status</span>
                     <span className="text-sm font-medium text-gray-900 capitalize">{recommendation.status}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Timeframe</span>
+                    <span className="text-sm font-medium text-gray-900">{getTimeframeLabel(recommendation.timeframe)}</span>
                   </div>
                 </div>
               </div>

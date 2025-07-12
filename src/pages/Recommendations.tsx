@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useRecommendations } from '../hooks/useRecommendations';
+import { getTimeframeLabel } from '../utils/timeframe';
 import { RecommendationFormModal } from '../components/modals/RecommendationFormModal';
 import { RecommendationDetailModal } from '../components/modals/RecommendationDetailModal';
 import { Recommendation } from '../types';
@@ -171,7 +172,7 @@ export const Recommendations: React.FC = () => {
                   <p className="text-xs md:text-sm text-gray-600 mb-2">
                     <span className="hidden sm:inline">By {recommendation.advisor?.name} • </span>
                     <span className="sm:hidden">{recommendation.advisor?.name} • </span>
-                    Target: ${recommendation.target_price}
+                    Target: ${recommendation.target_price} • {getTimeframeLabel(recommendation.timeframe)}
                   </p>
                   <p className="text-xs md:text-sm text-gray-700 mb-3 md:mb-4 line-clamp-2">
                     {recommendation.reasoning}
