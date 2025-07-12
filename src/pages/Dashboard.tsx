@@ -80,9 +80,18 @@ export const Dashboard: React.FC = () => {
           : advisorStats
       } />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {user?.role === 'operations' ? (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <RecentActivity activities={activityToDisplay} />
+          </div>
+          <div>
+            <TopPerformers performers={networkDashboardStats?.top_performers || []} />
+          </div>
+        </div>
+      ) : (
         <div className="lg:col-span-2">
-          <RecentActivity activities={
+          <RecentActivity activities={activityToDisplay} />
             user?.role === 'operations' 
               ? (dashboardStats?.recent_activity || [])
               : myMetrics ? [{
@@ -92,14 +101,7 @@ export const Dashboard: React.FC = () => {
                   created_at: new Date().toISOString(),
                   advisor: undefined
                 }] : []
-          } />
-        </div>
-        <div>
-          <TopPerformers performers={
-            dashboardStats?.top_performers || []
-          } />
-        </div>
-      </div>
+      )}
     </div>
   );
 };
