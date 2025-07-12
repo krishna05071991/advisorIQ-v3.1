@@ -7,6 +7,7 @@ import { Advisor, Recommendation, PerformanceMetrics } from '../types';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
+import { StarRating } from '../components/ui/StarRating';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { Search as SearchIcon, Filter, Download, Users, TrendingUp, BarChart3 } from 'lucide-react';
 
@@ -308,8 +309,12 @@ export const Search: React.FC = () => {
                         </span>
                       </div>
                       <p className="text-xs text-gray-600 mb-1">
-                        By {rec.advisor?.name} • Target: ${rec.target_price} • Confidence: {rec.confidence_level}%
+                        By {rec.advisor?.name} • Target: ${rec.target_price}
                       </p>
+                      <div className="flex items-center space-x-2 mb-1">
+                        <span className="text-xs text-gray-600">Confidence:</span>
+                        <StarRating rating={rec.confidence_level} size="sm" />
+                      </div>
                       <p className="text-xs text-gray-500 line-clamp-2">{rec.reasoning}</p>
                     </div>
                   </div>
