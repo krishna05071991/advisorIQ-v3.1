@@ -240,21 +240,20 @@ export const RecommendationFormModal: React.FC<RecommendationFormModalProps> = (
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Confidence Level: {formData.confidence_level}/5
+                Reasoning *
               </label>
               <textarea
                 value={formData.reasoning}
                 onChange={(e) => handleInputChange('reasoning', e.target.value)}
-                max="5"
                 rows={4}
                 className="w-full border border-gray-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 metallic-input"
                 required
                 disabled={loading}
               />
             </div>
-                <span>1</span>
-                <span>3</span>
-                <span>5</span>
+
+            <div className="flex flex-col-reverse sm:flex-row gap-3 pt-6">
+              <Button
                 type="button"
                 variant="secondary"
                 onClick={onClose}
