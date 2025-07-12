@@ -60,6 +60,16 @@ export const Dashboard: React.FC = () => {
     active_recommendations: 0,
   };
 
+  const activityToDisplay = user?.role === 'operations' 
+    ? (dashboardStats?.recent_activity || [])
+    : myMetrics ? [{
+        id: 'advisor-activity',
+        type: 'recommendation_added' as const,
+        description: `You have ${myMetrics.total_recommendations} total recommendations with ${myMetrics.success_rate.toFixed(1)}% success rate`,
+        created_at: new Date().toISOString(),
+        advisor: undefined
+      }] : [];
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
@@ -92,15 +102,7 @@ export const Dashboard: React.FC = () => {
       ) : (
         <div className="lg:col-span-2">
           <RecentActivity activities={activityToDisplay} />
-            user?.role === 'operations' 
-              ? (dashboardStats?.recent_activity || [])
-              : myMetrics ? [{
-                  id: 'advisor-activity',
-                  type: 'recommendation_added' as const,
-                  description: `You have ${myMetrics.total_recommendations} total recommendations with ${myMetrics.success_rate.toFixed(1)}% success rate`,
-                  created_at: new Date().toISOString(),
-                  advisor: undefined
-                }] : []
+        </div>
       )}
     </div>
   );
