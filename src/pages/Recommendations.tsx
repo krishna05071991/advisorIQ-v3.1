@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { useRecommendations } from '../hooks/useRecommendations';
+import { RecommendationFormModal } from '../components/modals/RecommendationFormModal';
+import { RecommendationDetailModal } from '../components/modals/RecommendationDetailModal';
+import { Recommendation } from '../types';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -7,9 +10,18 @@ import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { TrendingUp, Plus, Search, Filter } from 'lucide-react';
 
 export const Recommendations: React.FC = () => {
-  const { recommendations, loading } = useRecommendations();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [selectedRecommendation, setSelectedRecommendation] = useState<Recommendation | null>(null);
+  const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
+
+  const { recommendations, loading, createRecommendation, updateRecommendation } = useRecommendations(
+    undefined,
+    searchTerm,
+    filterStatus
+  );
 
   if (loading) {
     return (
@@ -19,12 +31,37 @@ export const Recommendations: React.FC = () => {
     );
   }
 
-  const filteredRecommendations = recommendations.filter(rec => {
-    const matchesSearch = rec.stock_symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         rec.advisor?.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = !filterStatus || rec.status === filterStatus;
-    return matchesSearch && matchesStatus;
-  });
+  const handleAddRecommendation = () => {
+    setSelectedRecommendation(null);
+    setFormMode('create');
+    setIsFormModalOpen(true);
+  };
+
+  const handleEditRecommendation = (recommendation: Recommendation) => {
+    setSelectedRecommendation(recommendation);
+    setFormMode('edit');
+    setIsFormModalOpen(true);
+  };
+
+  const handleViewDetails = (recommendation: Recommendation) => {
+    setSelectedRecommendation(recommendation);
+    setIsDetailModalOpen(true);
+  };
+
+  const handleFormSubmit = async (data: Partial<Recommendation>) => {
+    if (formMode === 'create') {
+      await createRecommendation(data);
+    } else if (selectedRecommendation) {
+      await updateRecommendation(selectedRecommendation.id, data);
+    }
+  };
+
+  const closeModals = () => {
+    setIsFormModalOpen(false);
+    setIsDetailModalOpen(false);
+    setSelectedRecommendation(null);
+  };
+
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -47,7 +84,7 @@ export const Recommendations: React.FC = () => {
             <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">Recommendations</h1>
             <p className="text-sm md:text-base text-gray-600">Track all investment recommendations</p>
           </div>
-          <Button className="flex items-center space-x-1 md:space-x-2 px-3 md:px-6">
+          <Button onClick={handleAddRecommendation} className="flex items-center space-x-1 md:space-x-2 px-3 md:px-6">
             <Plus className="w-4 h-4" />
             <span className="hidden sm:inline">Add Recommendation</span>
             <span className="sm:hidden">Add</span>
@@ -82,7 +119,7 @@ export const Recommendations: React.FC = () => {
       </div>
 
       {/* Recommendations List */}
-      {filteredRecommendations.length === 0 ? (
+      {recommendations.length === 0 ? (
         <Card className="p-6 md:p-12 text-center" variant="glass">
           <TrendingUp className="w-16 h-16 mx-auto mb-4 text-gray-300" />
           <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-2">No recommendations found</h3>
@@ -92,7 +129,7 @@ export const Recommendations: React.FC = () => {
               : 'Get started by adding your first recommendation'
             }
           </p>
-          <Button className="w-full sm:w-auto">
+          <Button onClick={handleAddRecommendation} className="w-full sm:w-auto">
             <Plus className="w-4 h-4 mr-2" />
             <span className="hidden sm:inline">Add Recommendation</span>
             <span className="sm:hidden">Add</span>
@@ -100,7 +137,7 @@ export const Recommendations: React.FC = () => {
         </Card>
       ) : (
         <div className="space-y-3 md:space-y-4">
-          {filteredRecommendations.map((recommendation) => (
+          {recommendations.map((recommendation) => (
             <Card key={recommendation.id} className="p-4 md:p-6" variant="glass">
               <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                 <div className="flex-1">
@@ -129,11 +166,21 @@ export const Recommendations: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex flex-row md:flex-col gap-2 self-start md:self-auto">
-                  <Button size="sm" variant="secondary" className="flex-1 md:flex-none whitespace-nowrap">
+                  <Button 
+                    size="sm" 
+                    variant="secondary" 
+                    className="flex-1 md:flex-none whitespace-nowrap"
+                    onClick={() => handleViewDetails(recommendation)}
+                  >
                     <span className="hidden sm:inline">View Details</span>
                     <span className="sm:hidden">View</span>
                   </Button>
-                  <Button size="sm" variant="ghost" className="flex-1 md:flex-none">
+                  <Button 
+                    size="sm" 
+                    variant="ghost" 
+                    className="flex-1 md:flex-none"
+                    onClick={() => handleEditRecommendation(recommendation)}
+                  >
                     Edit
                   </Button>
                 </div>
@@ -142,6 +189,25 @@ export const Recommendations: React.FC = () => {
           ))}
         </div>
       )}
+
+      {/* Modals */}
+      <RecommendationFormModal
+        isOpen={isFormModalOpen}
+        onClose={closeModals}
+        onSubmit={handleFormSubmit}
+        recommendation={selectedRecommendation}
+        mode={formMode}
+      />
+
+      <RecommendationDetailModal
+        isOpen={isDetailModalOpen}
+        onClose={closeModals}
+        recommendation={selectedRecommendation}
+        onEdit={(recommendation) => {
+          setIsDetailModalOpen(false);
+          handleEditRecommendation(recommendation);
+        }}
+      />
     </div>
   );
 };
