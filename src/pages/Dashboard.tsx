@@ -1,20 +1,42 @@
 import React from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { usePerformanceMetrics } from '../hooks/usePerformanceMetrics';
-import { useRecommendations } from '../hooks/useRecommendations';
 import { DashboardStats } from '../components/dashboard/DashboardStats';
 import { RecentActivity } from '../components/dashboard/RecentActivity';
 import { TopPerformers } from '../components/dashboard/TopPerformers';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
+import { supabase } from '../supabase';
 
 export const Dashboard: React.FC = () => {
   const { user } = useAuth();
-  const { dashboardStats, loading: metricsLoading } = usePerformanceMetrics();
-  const { recommendations, loading: recommendationsLoading } = useRecommendations(
-    user?.role === 'advisor' ? user.id : undefined
-  );
+  const [advisorId, setAdvisorId] = useState<string | null>(null);
+  
+  // For operations: get network-wide stats
+  const { dashboardStats, loading: networkLoading } = usePerformanceMetrics();
+  
+  // For advisors: get their specific metrics
+  const { metrics: advisorMetrics, loading: advisorLoading } = usePerformanceMetrics(advisorId || undefined);
 
-  const loading = metricsLoading || recommendationsLoading;
+  useEffect(() => {
+    const fetchAdvisorId = async () => {
+      if (user?.role === 'advisor' && user?.id) {
+        const { data: advisor } = await supabase
+          .from('advisors')
+          .select('id')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (advisor) {
+          setAdvisorId(advisor.id);
+        }
+      }
+    };
+
+    fetchAdvisorId();
+  }, [user?.id, user?.role]);
+
+  const loading = user?.role === 'operations' ? networkLoading : advisorLoading;
 
   if (loading) {
     return (
@@ -25,14 +47,18 @@ export const Dashboard: React.FC = () => {
   }
 
   // For advisor role, create personalized stats from their recommendations
-  const advisorStats = user?.role === 'advisor' ? {
+  const myMetrics = user?.role === 'advisor' ? advisorMetrics[0] : null;
+  const advisorStats = myMetrics ? {
     total_advisors: 1, // The advisor themselves
-    total_recommendations: recommendations.length,
-    overall_success_rate: recommendations.length > 0 
-      ? (recommendations.filter(r => r.status === 'successful').length / recommendations.length) * 100
-      : 0,
-    active_recommendations: recommendations.filter(r => r.status === 'ongoing').length,
-  } : null;
+    total_recommendations: myMetrics.total_recommendations,
+    overall_success_rate: myMetrics.success_rate,
+    active_recommendations: myMetrics.ongoing_recommendations,
+  } : {
+    total_advisors: 1,
+    total_recommendations: 0,
+    overall_success_rate: 0,
+    active_recommendations: 0,
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -51,7 +77,7 @@ export const Dashboard: React.FC = () => {
       <DashboardStats stats={
         user?.role === 'operations' 
           ? (dashboardStats || { total_advisors: 0, total_recommendations: 0, overall_success_rate: 0, active_recommendations: 0 })
-          : (advisorStats || { total_advisors: 0, total_recommendations: 0, overall_success_rate: 0, active_recommendations: 0 })
+          : advisorStats
       } />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -59,20 +85,18 @@ export const Dashboard: React.FC = () => {
           <RecentActivity activities={
             user?.role === 'operations' 
               ? (dashboardStats?.recent_activity || [])
-              : recommendations.slice(0, 5).map(rec => ({
-                  id: rec.id,
+              : myMetrics ? [{
+                  id: 'advisor-activity',
                   type: 'recommendation_added' as const,
-                  description: `You added ${rec.action.toUpperCase()} recommendation for ${rec.stock_symbol}`,
-                  created_at: rec.created_at,
+                  description: `You have ${myMetrics.total_recommendations} total recommendations with ${myMetrics.success_rate.toFixed(1)}% success rate`,
+                  created_at: new Date().toISOString(),
                   advisor: undefined
-                }))
+                }] : []
           } />
         </div>
         <div>
           <TopPerformers performers={
-            user?.role === 'operations' 
-              ? (dashboardStats?.top_performers || [])
-              : []
+            dashboardStats?.top_performers || []
           } />
         </div>
       </div>
