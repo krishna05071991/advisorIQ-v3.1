@@ -33,48 +33,102 @@ export const Analytics: React.FC = () => {
           {timeSeriesData.length > 0 ? (
             <div className="h-48 md:h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={timeSeriesData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <LineChart data={timeSeriesData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                  <defs>
+                    <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.8}/>
+                      <stop offset="100%" stopColor="#1d4ed8" stopOpacity={0.9}/>
+                    </linearGradient>
+                    <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor="#10b981"/>
+                      <stop offset="100%" stopColor="#059669"/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid 
+                    strokeDasharray="3 3" 
+                    stroke="#cbd5e1" 
+                    strokeOpacity={0.3}
+                    vertical={false}
+                  />
                   <XAxis 
                     dataKey="date" 
-                    stroke="#64748b" 
+                    stroke="#64748b"
+                    strokeOpacity={0.8}
                     fontSize={12}
+                    tickMargin={8}
+                    axisLine={false}
+                    tickLine={false}
                   />
                   <YAxis 
                     yAxisId="left"
-                    stroke="#64748b" 
+                    stroke="#64748b"
+                    strokeOpacity={0.8}
                     fontSize={12}
+                    axisLine={false}
+                    tickLine={false}
+                    width={40}
                   />
                   <YAxis 
                     yAxisId="right" 
                     orientation="right"
-                    stroke="#64748b" 
+                    stroke="#64748b"
+                    strokeOpacity={0.8}
                     fontSize={12}
+                    axisLine={false}
+                    tickLine={false}
+                    width={40}
                   />
                   <Tooltip 
                     contentStyle={{ 
-                      backgroundColor: 'rgba(255, 255, 255, 0.95)', 
-                      borderRadius: '12px', 
-                      border: '1px solid rgba(255, 255, 255, 0.2)',
-                      backdropFilter: 'blur(20px)'
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                      borderRadius: '16px',
+                      border: 'none',
+                      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
+                      backdropFilter: 'blur(20px)',
+                      fontSize: '14px',
+                      fontWeight: '300'
+                    }}
+                    labelStyle={{ color: '#1e293b', fontWeight: '500' }}
+                    formatter={(value, name) => [
+                      typeof value === 'number' ? 
+                        (name === 'Success Rate (%)' ? `${value.toFixed(1)}%` : value) : 
+                        value,
+                      name
+                    ]}
+                  />
+                  <Legend 
+                    wrapperStyle={{ 
+                      paddingTop: '20px',
+                      fontSize: '14px',
+                      fontWeight: '300'
                     }}
                   />
-                  <Legend />
                   <Bar 
                     yAxisId="left"
                     dataKey="recommendations" 
-                    fill="#3b82f6" 
+                    fill="url(#barGradient)"
                     name="Recommendations"
-                    radius={[4, 4, 0, 0]}
+                    radius={[6, 6, 0, 0]}
+                    barSize={32}
+                    opacity={0.9}
                   />
                   <Line 
                     yAxisId="right"
                     type="monotone" 
                     dataKey="successRate" 
-                    stroke="#10b981" 
-                    strokeWidth={3}
+                    stroke="url(#lineGradient)"
+                    strokeWidth={4}
                     name="Success Rate (%)"
-                    dot={{ fill: '#10b981', strokeWidth: 2, r: 4 }}
+                    dot={{ fill: '#10b981', strokeWidth: 0, r: 5, fillOpacity: 0.8 }}
+                    activeDot={{ 
+                      r: 8, 
+                      strokeWidth: 3, 
+                      stroke: '#10b981', 
+                      fill: '#ffffff',
+                      strokeOpacity: 0.8,
+                      style: { filter: 'drop-shadow(0 4px 8px rgba(16, 185, 129, 0.3))' }
+                    }}
+                    connectNulls={false}
                   />
                 </LineChart>
               </ResponsiveContainer>
