@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document provides a comprehensive list of ALL functionalities implemented in the AdvisorIQ platform, organized by user role. This documentation is based exclusively on the current codebase and does not include future or planned features.
+This document provides a comprehensive list of ALL functionalities implemented in the AdvisorIQ platform, organized by user role, along with detailed implementation explanations. This documentation is based exclusively on the current codebase and does not include future or planned features.
 
 ## Table of Contents
 
@@ -10,7 +10,7 @@ This document provides a comprehensive list of ALL functionalities implemented i
 2. [Operations Staff (Admin) Functionalities](#operations-staff-admin-functionalities)
 3. [Advisor Functionalities](#advisor-functionalities)
 4. [Shared Functionalities](#shared-functionalities)
-5. [Technical Implementation Details](#technical-implementation-details)
+5. [Implementation Details](#implementation-details)
 
 ---
 
@@ -179,63 +179,605 @@ This document provides a comprehensive list of ALL functionalities implemented i
 
 ---
 
-## Technical Implementation Details
+## Implementation Details
 
-### Database Integration
-- **Supabase Integration**: Full integration with Supabase backend
-- **Row Level Security**: Database-level security enforcement
-- **Real-Time Subscriptions**: Live data updates (where implemented)
-- **Optimized Queries**: Efficient database queries with proper indexing
+### Technology Stack & Architecture
 
-### State Management
-- **React Hooks**: Custom hooks for data management
-- **Context Providers**: Authentication state management via React Context
-- **Local State**: Component-level state for UI interactions
-- **Form State**: Controlled form inputs with validation
+#### **Core Stack Rationale**
+```
+Frontend: React 18 + TypeScript + Vite
+Backend: Supabase (PostgreSQL + Auth + Real-time)
+Styling: Tailwind CSS + Custom Glass Morphism
+Charts: Recharts
+Routing: React Router v7
+State Management: React Context + Custom Hooks
+```
 
-### Performance Optimizations
-- **Code Splitting**: React Router-based route splitting
-- **Optimized Rendering**: Efficient re-rendering patterns
-- **Image Optimization**: Optimized external image loading
-- **Mobile Performance**: Responsive design optimizations
+**Why This Stack:**
+- **React + TypeScript**: Type safety, component reusability, and robust ecosystem
+- **Supabase**: Real-time capabilities, built-in auth, RLS security, and PostgreSQL reliability
+- **Tailwind CSS**: Rapid development, consistent design system, responsive utilities
+- **Vite**: Fast development server, optimized builds, modern tooling
+- **Recharts**: React-native charts, customizable, good mobile support
 
-### Charts & Visualization
-- **Recharts Integration**: Professional chart library implementation
-- **Responsive Charts**: Mobile-optimized chart rendering
-- **Interactive Elements**: Hover states and tooltips
-- **Multiple Chart Types**: Bar charts, line charts, and combo charts
-- **Real Data Integration**: Charts populated with actual database data
+### Authentication Implementation
 
-### Security Features
-- **Authentication Required**: All routes protected
-- **Role-Based Access**: Different capabilities per role
-- **Data Isolation**: Users can only access authorized data
-- **Input Sanitization**: Proper validation and sanitization
-- **Secure Image Loading**: External image URL validation
+#### **Design Pattern: Context Provider + Supabase Auth**
 
----
+```typescript
+// Pseudo Code Structure
+interface AuthFlow {
+  1. User submits email/password
+  2. Supabase Auth validates credentials
+  3. Fetch user profile from user_profiles table
+  4. Determine role (admin/advisor)
+  5. Create advisor profile if role = 'advisor'
+  6. Set user context state
+  7. Redirect to role-based dashboard
+}
+```
 
-## Data Flow Summary
+**Implementation Details:**
 
-### For Operations Staff:
-1. **Login** → **Network Dashboard** → **Manage Advisors/Recommendations** → **Analytics** → **Search**
-2. Can view and edit all data across the platform
-3. Access to network-wide analytics and performance metrics
+**File: `src/contexts/AuthContext.tsx`**
+```typescript
+// Core authentication logic using Supabase
+const login = async (email: string, password: string) => {
+  // 1. Authenticate with Supabase
+  const { data, error } = await supabase.auth.signInWithPassword({ 
+    email, password 
+  });
+  
+  // 2. Fetch user profile for role determination
+  const { data: profile } = await supabase
+    .from('user_profiles')
+    .select('*')
+    .eq('id', data.session.user.id)
+    .single();
+    
+  // 3. Auto-create advisor profile if needed
+  if (profile.role === 'advisor') {
+    await createAdvisorProfile(profile);
+  }
+  
+  // 4. Set user state with role mapping
+  setUser({
+    id: profile.id,
+    email: profile.email,
+    role: profile.role === 'admin' ? 'operations' : 'advisor'
+  });
+}
+```
 
-### For Advisors:
-1. **Login** → **Personal Dashboard** → **Manage Own Recommendations** → **View Performance** → **Update Profile**
-2. Can only access and modify their own data
-3. Create and manage personal investment recommendations
-4. Track personal performance metrics
+**Rationale:**
+- **Context API**: Global state management without external dependencies
+- **Automatic profile creation**: Seamless user onboarding
+- **Role-based mapping**: Clean separation between database roles and UI roles
+- **Session persistence**: Automatic login state restoration
 
-### Data Security:
-- All database access controlled by Row Level Security policies
-- Users can only access data they're authorized to see
-- Role-based UI prevents unauthorized access attempts
-- Database constraints ensure data integrity
+### Database Operations Pattern
 
----
+#### **Custom Hooks Architecture**
 
-## Conclusion
+```typescript
+// Pattern: Custom Hook + Supabase Client + RLS
+interface DatabasePattern {
+  Hook: useHookName()
+  Client: supabase.from('table')
+  Security: RLS policies
+  State: React useState
+  Effects: useEffect for data fetching
+}
+```
 
-This documentation covers all implemented functionalities in the AdvisorIQ platform as of the current codebase. The platform provides a comprehensive solution for managing investment advisors and their recommendations, with clear separation of concerns between operational oversight and advisor self-management capabilities.
+**Example: `src/hooks/useAdvisors.ts`**
+```typescript
+// Pseudo Code Structure
+function useAdvisors(searchTerm?, filterSpecialization?) {
+  // 1. State management
+  const [advisors, setAdvisors] = useState([]);
+  const [loading, setLoading] = useState(true);
+  
+  // 2. Data fetching with filters
+  const fetchAdvisors = async () => {
+    let query = supabase
+      .from('advisors')
+      .select('*')
+      .eq('is_active', true);
+      
+    // Apply search filters
+    if (searchTerm) {
+      query = query.or(`name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`);
+    }
+    
+    // Apply specialization filter
+    if (filterSpecialization) {
+      query = query.eq('specialization', filterSpecialization);
+    }
+    
+    const { data } = await query;
+    setAdvisors(data || []);
+  };
+  
+  // 3. CRUD operations
+  const updateAdvisor = async (id, data) => {
+    await supabase
+      .from('advisors')
+      .update({ ...data, updated_at: new Date().toISOString() })
+      .eq('id', id);
+      
+    await fetchAdvisors(); // Refresh data
+  };
+  
+  return { advisors, loading, updateAdvisor };
+}
+```
+
+**Rationale:**
+- **Custom hooks**: Reusable data logic across components
+- **Automatic refetching**: Data consistency after mutations
+- **Built-in loading states**: Better UX with loading indicators
+- **Error handling**: Graceful failure management
+
+### UI Component Architecture
+
+#### **Glass Morphism Design System**
+
+```css
+/* Core Design Tokens in src/index.css */
+:root {
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --shadow-glass: 0 8px 64px rgba(0, 0, 0, 0.08);
+  --metallic-gradient: linear-gradient(135deg, #ffffff 0%, #f8fafc 25%);
+}
+
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-glass);
+}
+```
+
+**Component Pattern: `src/components/ui/Card.tsx`**
+```typescript
+// Reusable card component with variant system
+interface CardProps {
+  variant: 'default' | 'glass' | 'premium' | 'floating';
+  children: React.ReactNode;
+}
+
+const Card: React.FC<CardProps> = ({ variant = 'glass', children }) => {
+  const variantClasses = {
+    glass: 'glass-card rounded-2xl',
+    premium: 'premium-gradient rounded-2xl shadow-2xl',
+    floating: 'glass-card rounded-2xl floating-element'
+  };
+  
+  return (
+    <div className={variantClasses[variant]}>
+      {children}
+    </div>
+  );
+};
+```
+
+**Rationale:**
+- **Design system consistency**: Unified visual language
+- **CSS custom properties**: Easy theming and maintenance
+- **Backdrop filters**: Modern glass effect with performance
+- **Variant system**: Flexible component usage
+
+### Real-Time Search Implementation
+
+#### **Debounced Search Pattern**
+
+```typescript
+// Pattern: useState + useEffect + Debouncing
+interface SearchImplementation {
+  Component: Input field with onChange
+  State: searchTerm state
+  Effect: useEffect with cleanup
+  API: Supabase query with filters
+  Performance: Debouncing to prevent excessive queries
+}
+```
+
+**Example: Search in `src/pages/Advisors.tsx`**
+```typescript
+// Pseudo Code Structure
+function AdvisorsPage() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const { advisors } = useAdvisors(searchTerm); // Custom hook handles debouncing
+  
+  // Real-time filtering without API calls
+  const filteredAdvisors = advisors.filter(advisor =>
+    advisor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    advisor.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  
+  return (
+    <Input 
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      placeholder="Search advisors..."
+    />
+  );
+}
+```
+
+**Rationale:**
+- **Client-side filtering**: Instant feedback for small datasets
+- **Server-side search**: Scalable for large datasets via Supabase
+- **Debouncing**: Performance optimization to prevent excessive API calls
+- **Progressive enhancement**: Works offline after initial data load
+
+### Charts Implementation
+
+#### **Recharts with Custom Styling**
+
+```typescript
+// Pattern: Recharts + Custom Gradients + Responsive Design
+interface ChartImplementation {
+  Library: Recharts (React-native charts)
+  Data: Time series from performance metrics
+  Styling: Custom gradients + glass morphism
+  Responsive: ResponsiveContainer + breakpoint-based sizing
+}
+```
+
+**Example: `src/pages/Analytics.tsx`**
+```typescript
+// Pseudo Code Structure
+function NetworkPerformanceChart({ timeSeriesData }) {
+  return (
+    <ResponsiveContainer width="100%" height="100%">
+      <LineChart data={timeSeriesData}>
+        {/* Custom gradients for visual appeal */}
+        <defs>
+          <linearGradient id="barGradient">
+            <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.8}/>
+            <stop offset="100%" stopColor="#1d4ed8" stopOpacity={0.9}/>
+          </linearGradient>
+        </defs>
+        
+        {/* Minimal grid for clean look */}
+        <CartesianGrid 
+          strokeDasharray="3 3" 
+          stroke="#cbd5e1" 
+          strokeOpacity={0.3}
+          vertical={false}
+        />
+        
+        {/* Custom styling for mobile responsiveness */}
+        <XAxis 
+          fontSize={10} 
+          axisLine={false} 
+          tickLine={false}
+          interval="preserveStartEnd"
+        />
+        
+        {/* Glass morphism tooltip */}
+        <Tooltip 
+          contentStyle={{ 
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            borderRadius: '16px',
+            backdropFilter: 'blur(20px)'
+          }}
+        />
+        
+        {/* Multiple data series */}
+        <Bar dataKey="recommendations" fill="url(#barGradient)" />
+        <Line dataKey="successRate" stroke="#10b981" strokeWidth={4} />
+      </LineChart>
+    </ResponsiveContainer>
+  );
+}
+```
+
+**Rationale:**
+- **Recharts library**: React-native, good mobile support, extensive customization
+- **Custom gradients**: Visual appeal matching app design
+- **Responsive containers**: Automatic sizing for all screen sizes
+- **Glass morphism tooltips**: Consistent with app design language
+
+### Modal System Implementation
+
+#### **Portal-Based Modal Pattern**
+
+```typescript
+// Pattern: Portal + Backdrop + Glass Card + Form Management
+interface ModalImplementation {
+  Rendering: React Portal for z-index management
+  Backdrop: Blur overlay with click-to-close
+  Content: Glass morphism card with animations
+  Forms: Controlled components with validation
+}
+```
+
+**Example: `src/components/modals/RecommendationFormModal.tsx`**
+```typescript
+// Pseudo Code Structure
+function RecommendationFormModal({ isOpen, onClose, onSubmit, mode }) {
+  // Form state management
+  const [formData, setFormData] = useState(initialState);
+  const [loading, setLoading] = useState(false);
+  
+  // Form submission with validation
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Client-side validation
+    if (!formData.stock_symbol || !formData.reasoning) {
+      throw new Error('Required fields missing');
+    }
+    
+    // API call with loading state
+    setLoading(true);
+    await onSubmit(formData);
+    onClose();
+  };
+  
+  if (!isOpen) return null;
+  
+  return (
+    // Portal for z-index management
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50">
+      {/* Glass morphism card */}
+      <Card variant="glass" className="max-w-3xl">
+        {/* Form with controlled inputs */}
+        <form onSubmit={handleSubmit}>
+          <Input 
+            value={formData.stock_symbol}
+            onChange={(e) => setFormData(prev => ({ 
+              ...prev, 
+              stock_symbol: e.target.value.toUpperCase() 
+            }))}
+          />
+          {/* Submit with loading state */}
+          <Button loading={loading} type="submit">
+            {mode === 'create' ? 'Create' : 'Update'} Recommendation
+          </Button>
+        </form>
+      </Card>
+    </div>
+  );
+}
+```
+
+**Rationale:**
+- **React portals**: Proper z-index management and DOM structure
+- **Backdrop blur**: Modern modal experience with focus management
+- **Controlled forms**: Predictable state management and validation
+- **Loading states**: Better UX during async operations
+
+### Performance Optimization Strategies
+
+#### **Data Fetching Optimization**
+
+```typescript
+// Pattern: Custom Hooks + Memoization + Selective Queries
+interface PerformancePattern {
+  Hooks: Custom hooks for data encapsulation
+  Memoization: React.useMemo for expensive calculations
+  Queries: Selective column fetching from Supabase
+  Caching: Application-level state caching
+}
+```
+
+**Example: Performance Metrics Calculation**
+```typescript
+// Pseudo Code Structure
+function usePerformanceMetrics(advisorId?) {
+  const [metrics, setMetrics] = useState([]);
+  const [timeSeriesData, setTimeSeriesData] = useState([]);
+  
+  // Memoized expensive calculations
+  const processedMetrics = useMemo(() => {
+    return metrics.map(metric => ({
+      ...metric,
+      success_rate: (metric.successful / metric.total) * 100
+    }));
+  }, [metrics]);
+  
+  // Optimized database queries
+  const fetchMetrics = async () => {
+    // Only fetch necessary columns
+    let query = supabase
+      .from('recommendations')
+      .select('advisor_id, status, created_at') // Selective columns
+      .order('created_at');
+      
+    if (advisorId) {
+      query = query.eq('advisor_id', advisorId); // Filtered queries
+    }
+    
+    const { data } = await query;
+    
+    // Client-side aggregation for better performance
+    const aggregated = data.reduce((acc, rec) => {
+      // Grouping and calculation logic
+      return acc;
+    }, {});
+    
+    setMetrics(aggregated);
+  };
+  
+  return { metrics: processedMetrics, timeSeriesData };
+}
+```
+
+**Rationale:**
+- **Selective queries**: Fetch only needed data to reduce bandwidth
+- **Client-side aggregation**: Better performance for small datasets
+- **Memoization**: Prevent unnecessary recalculations
+- **Conditional loading**: Load data only when needed
+
+### Mobile Responsiveness Implementation
+
+#### **Mobile-First Responsive Design**
+
+```css
+/* Mobile-first breakpoint system */
+@media (max-width: 640px) {
+  /* Prevent horizontal overflow */
+  html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+  
+  /* Responsive text sizing */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  /* Touch-friendly targets */
+  button, .touch-target {
+    min-height: 44px;
+  }
+}
+```
+
+**Component Pattern: Responsive Navigation**
+```typescript
+// Pattern: Mobile-first + Progressive Enhancement
+function Navigation() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
+  return (
+    <>
+      {/* Desktop navigation */}
+      <div className="hidden md:flex items-center space-x-8">
+        {navItems.map(item => (
+          <NavLink key={item.path} className="flex items-center space-x-1">
+            <Icon className="w-4 h-4" />
+            <span>{item.label}</span>
+          </NavLink>
+        ))}
+      </div>
+      
+      {/* Mobile hamburger */}
+      <button 
+        className="md:hidden w-11 h-11"
+        onClick={() => setIsMobileMenuOpen(true)}
+      >
+        <HamburgerIcon />
+      </button>
+      
+      {/* Mobile slide-out menu */}
+      <div className={`fixed top-0 right-0 h-full w-80 transform transition-transform duration-300 ${
+        isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
+      }`}>
+        {/* Mobile menu content */}
+      </div>
+    </>
+  );
+}
+```
+
+**Rationale:**
+- **Mobile-first approach**: Better performance on mobile devices
+- **Progressive enhancement**: Enhanced experience on larger screens
+- **Touch-friendly targets**: 44px minimum for accessibility
+- **Slide-out navigation**: Space-efficient mobile navigation pattern
+
+### Security Implementation
+
+#### **Row-Level Security (RLS) Integration**
+
+```typescript
+// Pattern: Database-level security + Application-level checks
+interface SecurityImplementation {
+  Database: RLS policies in PostgreSQL
+  Application: Role-based route protection
+  API: Supabase client with auth context
+  Validation: Input sanitization and validation
+}
+```
+
+**Database Security Pattern:**
+```sql
+-- Example RLS policy structure
+CREATE POLICY "admin_manage_advisors" ON advisors
+  FOR ALL TO authenticated
+  USING (EXISTS (
+    SELECT 1 FROM user_profiles 
+    WHERE user_profiles.id = auth.uid() 
+    AND user_profiles.role = 'admin'
+  ));
+```
+
+**Application Security Pattern:**
+```typescript
+// Protected route wrapper
+function ProtectedRoute({ children }) {
+  const { user, loading } = useAuth();
+  
+  if (loading) return <LoadingSpinner />;
+  if (!user) return <LoginForm />;
+  
+  return (
+    <div className="min-h-screen">
+      <Navigation />
+      <main>{children}</main>
+    </div>
+  );
+}
+
+// Role-based component rendering
+function AppRoutes() {
+  const { user } = useAuth();
+  
+  return (
+    <Routes>
+      <Route path="/dashboard" element={<Dashboard />} />
+      
+      {/* Operations-only routes */}
+      {user?.role === 'operations' && (
+        <>
+          <Route path="/advisors" element={<Advisors />} />
+          <Route path="/analytics" element={<Analytics />} />
+        </>
+      )}
+      
+      {/* Advisor-only routes */}
+      {user?.role === 'advisor' && (
+        <>
+          <Route path="/my-recommendations" element={<MyRecommendations />} />
+          <Route path="/my-profile" element={<MyProfile />} />
+        </>
+      )}
+    </Routes>
+  );
+}
+```
+
+**Rationale:**
+- **Database-level security**: Security cannot be bypassed even if application logic fails
+- **Role-based routing**: Clean separation of user capabilities
+- **Authentication guards**: Prevent unauthorized access
+- **Input validation**: Prevent malicious data submission
+
+### Data Flow Summary
+
+#### **Complete Data Flow Architecture**
+
+```
+Authentication Flow:
+User → Supabase Auth → user_profiles table → Role determination → Context state → UI rendering
+
+Data Fetching Flow:
+Component → Custom Hook → Supabase Client → RLS Policy Check → Database Query → State Update → UI Re-render
+
+Form Submission Flow:
+User Input → Form Validation → Loading State → API Call → Database Update → Data Refresh → UI Update
+
+Security Flow:
+User Action → Authentication Check → Role Authorization → RLS Policy → Database Operation → Success/Error Response
+```
+
+This comprehensive implementation documentation provides your client with complete understanding of how each functionality was built, why specific technical decisions were made, and how the various components work together to create a cohesive, secure, and performant application.
