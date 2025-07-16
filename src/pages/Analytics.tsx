@@ -25,56 +25,111 @@ export const Analytics: React.FC = () => {
 
       {/* Performance Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8 mb-6 md:mb-8">
-        <Card className="p-4 md:p-6 lg:col-span-2" variant="glass">
+        <Card className="p-3 sm:p-4 md:p-6 lg:col-span-2" variant="glass">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-base md:text-lg font-semibold text-gray-900">Network Performance</h3>
             <BarChart3 className="w-5 h-5 text-gray-400" />
           </div>
           {timeSeriesData.length > 0 ? (
-            <div className="h-48 md:h-64">
+            <div className="h-48 md:h-64 w-full overflow-hidden">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={timeSeriesData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <LineChart data={timeSeriesData} margin={{ top: 10, right: 10, left: 0, bottom: 10 }}>
+                  <defs>
+                    <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.8}/>
+                      <stop offset="100%" stopColor="#1d4ed8" stopOpacity={0.9}/>
+                    </linearGradient>
+                    <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor="#10b981"/>
+                      <stop offset="100%" stopColor="#059669"/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid 
+                    strokeDasharray="3 3" 
+                    stroke="#cbd5e1" 
+                    strokeOpacity={0.3}
+                    vertical={false}
+                  />
                   <XAxis 
                     dataKey="date" 
-                    stroke="#64748b" 
-                    fontSize={12}
+                    stroke="#64748b"
+                    strokeOpacity={0.8}
+                    fontSize={10}
+                    tickMargin={4}
+                    axisLine={false}
+                    tickLine={false}
+                    interval="preserveStartEnd"
                   />
                   <YAxis 
                     yAxisId="left"
-                    stroke="#64748b" 
-                    fontSize={12}
+                    stroke="#64748b"
+                    strokeOpacity={0.8}
+                    fontSize={10}
+                    axisLine={false}
+                    tickLine={false}
+                    width={25}
                   />
                   <YAxis 
                     yAxisId="right" 
                     orientation="right"
-                    stroke="#64748b" 
-                    fontSize={12}
+                    stroke="#64748b"
+                    strokeOpacity={0.8}
+                    fontSize={10}
+                    axisLine={false}
+                    tickLine={false}
+                    width={25}
                   />
                   <Tooltip 
                     contentStyle={{ 
-                      backgroundColor: 'rgba(255, 255, 255, 0.95)', 
-                      borderRadius: '12px', 
-                      border: '1px solid rgba(255, 255, 255, 0.2)',
-                      backdropFilter: 'blur(20px)'
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                      borderRadius: '16px',
+                      border: 'none',
+                      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
+                      backdropFilter: 'blur(20px)',
+                      fontSize: '12px',
+                      fontWeight: '300'
+                    }}
+                    labelStyle={{ color: '#1e293b', fontWeight: '500' }}
+                    formatter={(value, name) => [
+                      typeof value === 'number' ? 
+                        (name === 'Success Rate (%)' ? `${value.toFixed(1)}%` : value) : 
+                        value,
+                      name
+                    ]}
+                  />
+                  <Legend 
+                    wrapperStyle={{ 
+                      paddingTop: '20px',
+                      fontSize: '12px',
+                      fontWeight: '300'
                     }}
                   />
-                  <Legend />
                   <Bar 
                     yAxisId="left"
                     dataKey="recommendations" 
-                    fill="#3b82f6" 
+                    fill="url(#barGradient)"
                     name="Recommendations"
-                    radius={[4, 4, 0, 0]}
+                    radius={[6, 6, 0, 0]}
+                    barSize={24}
+                    opacity={0.9}
                   />
                   <Line 
                     yAxisId="right"
                     type="monotone" 
                     dataKey="successRate" 
-                    stroke="#10b981" 
-                    strokeWidth={3}
+                    stroke="url(#lineGradient)"
+                    strokeWidth={4}
                     name="Success Rate (%)"
-                    dot={{ fill: '#10b981', strokeWidth: 2, r: 4 }}
+                    dot={{ fill: '#10b981', strokeWidth: 0, r: 3, fillOpacity: 0.8 }}
+                    activeDot={{ 
+                      r: 6, 
+                      strokeWidth: 3, 
+                      stroke: '#10b981', 
+                      fill: '#ffffff',
+                      strokeOpacity: 0.8,
+                      style: { filter: 'drop-shadow(0 4px 8px rgba(16, 185, 129, 0.3))' }
+                    }}
+                    connectNulls={false}
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -90,7 +145,7 @@ export const Analytics: React.FC = () => {
           )}
         </Card>
 
-        <Card className="p-4 md:p-6" variant="glass">
+        <Card className="p-3 sm:p-4 md:p-6" variant="glass">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-base md:text-lg font-semibold text-gray-900">Key Metrics</h3>
             <Target className="w-5 h-5 text-gray-400" />
@@ -119,7 +174,7 @@ export const Analytics: React.FC = () => {
       </div>
 
       {/* Performance Rankings */}
-      <Card className="p-4 md:p-6" variant="glass">
+      <Card className="p-3 sm:p-4 md:p-6" variant="glass">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-base md:text-lg font-semibold text-gray-900">
             <span className="hidden sm:inline">Advisor Performance Rankings</span>
@@ -134,22 +189,22 @@ export const Analytics: React.FC = () => {
               const rankIcon = index < 3 ? rankIcons[index] : `${index + 1}.`;
               
               return (
-                <div key={performer.advisor_id} className="flex items-center justify-between p-3 bg-white/30 backdrop-blur-sm rounded-xl">
+                <div key={performer.advisor_id} className="flex items-center justify-between p-2 sm:p-3 bg-white/30 backdrop-blur-sm rounded-xl">
                   <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-sm font-semibold">
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-xs sm:text-sm font-semibold">
                       {rankIcon}
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">
                         {performer.advisor?.name || 'Unknown Advisor'}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-500 truncate">
                         {performer.total_recommendations} recommendations
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-semibold text-gray-900">
+                    <p className="text-xs sm:text-sm font-semibold text-gray-900">
                       {performer.success_rate.toFixed(1)}%
                     </p>
                     <p className="text-xs text-gray-500">

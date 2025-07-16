@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Recommendation } from '../../types';
 import { useAdvisors } from '../../hooks/useAdvisors';
+import { getTimeframeOptions } from '../../utils/timeframe';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -24,6 +25,7 @@ export const RecommendationFormModal: React.FC<RecommendationFormModalProps> = (
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { advisors } = useAdvisors();
+  const timeframeOptions = getTimeframeOptions();
   
   const [formData, setFormData] = useState({
     advisor_id: '',
@@ -31,7 +33,8 @@ export const RecommendationFormModal: React.FC<RecommendationFormModalProps> = (
     action: 'buy' as 'buy' | 'sell' | 'hold',
     target_price: '',
     reasoning: '',
-    confidence_level: 75,
+    confidence_level: 3,
+    timeframe: 3,
     status: 'ongoing' as 'ongoing' | 'successful' | 'unsuccessful',
   });
 
@@ -43,7 +46,8 @@ export const RecommendationFormModal: React.FC<RecommendationFormModalProps> = (
         action: recommendation.action || 'buy',
         target_price: recommendation.target_price?.toString() || '',
         reasoning: recommendation.reasoning || '',
-        confidence_level: recommendation.confidence_level || 75,
+        confidence_level: recommendation.confidence_level || 3,
+        timeframe: recommendation.timeframe || 3,
         status: recommendation.status || 'ongoing',
       });
     } else {
@@ -53,7 +57,8 @@ export const RecommendationFormModal: React.FC<RecommendationFormModalProps> = (
         action: 'buy',
         target_price: '',
         reasoning: '',
-        confidence_level: 75,
+        confidence_level: 3,
+        timeframe: 3,
         status: 'ongoing',
       });
     }
@@ -203,21 +208,40 @@ export const RecommendationFormModal: React.FC<RecommendationFormModalProps> = (
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Confidence Level: {formData.confidence_level}%
+                  Timeframe *
+                </label>
+                <select
+                  value={formData.timeframe}
+                  onChange={(e) => handleInputChange('timeframe', parseInt(e.target.value))}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 metallic-input"
+                  required
+                  disabled={loading}
+                >
+                  {timeframeOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Confidence Level: {formData.confidence_level}/5
                 </label>
                 <input
                   type="range"
                   min="1"
-                  max="100"
+                  max="5"
                   value={formData.confidence_level}
                   onChange={(e) => handleInputChange('confidence_level', parseInt(e.target.value))}
                   className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
                   disabled={loading}
                 />
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
-                  <span>1%</span>
-                  <span>50%</span>
-                  <span>100%</span>
+                  <span>1</span>
+                  <span>3</span>
+                  <span>5</span>
                 </div>
               </div>
 
@@ -245,7 +269,6 @@ export const RecommendationFormModal: React.FC<RecommendationFormModalProps> = (
               <textarea
                 value={formData.reasoning}
                 onChange={(e) => handleInputChange('reasoning', e.target.value)}
-                placeholder="Provide detailed reasoning for this recommendation"
                 rows={4}
                 className="w-full border border-gray-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 metallic-input"
                 required

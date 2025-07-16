@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { useAdvisors } from '../hooks/useAdvisors';
 import { useRecommendations } from '../hooks/useRecommendations';
 import { usePerformanceMetrics } from '../hooks/usePerformanceMetrics';
+import { getTimeframeLabel } from '../utils/timeframe';
 import { AdvancedFiltersModal, AdvancedFilters } from '../components/modals/AdvancedFiltersModal';
 import { Advisor, Recommendation, PerformanceMetrics } from '../types';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
+import { StarRating } from '../components/ui/StarRating';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { Search as SearchIcon, Filter, Download, Users, TrendingUp, BarChart3 } from 'lucide-react';
 
@@ -27,7 +29,8 @@ export const Search: React.FC = () => {
     confidenceMax: 100,
     specialization: '',
     action: '',
-    status: ''
+    status: '',
+    timeframe: ''
   });
   const [isAdvancedModalOpen, setIsAdvancedModalOpen] = useState(false);
   const [searchResults, setSearchResults] = useState<SearchResults>({
@@ -122,6 +125,11 @@ export const Search: React.FC = () => {
             rec.confidence_level <= advancedFilters.confidenceMax
           );
         }
+        if (advancedFilters.timeframe) {
+          filteredRecommendations = filteredRecommendations.filter(rec => 
+            rec.timeframe === advancedFilters.timeframe
+          );
+        }
 
         results.recommendations = applyDateFilter(filteredRecommendations);
       }
@@ -172,7 +180,7 @@ export const Search: React.FC = () => {
     } else if (searchType === 'recommendations') {
       csvContent += 'Stock Symbol,Action,Target Price,Confidence,Status,Advisor,Created Date\n';
       recommendations.forEach(rec => {
-        csvContent += `"${rec.stock_symbol}","${rec.action}","${rec.target_price}","${rec.confidence_level}","${rec.status}","${rec.advisor?.name || ''}","${new Date(rec.created_at).toLocaleDateString()}"\n`;
+        csvContent += `"${rec.stock_symbol}","${rec.action}","${rec.target_price}","${rec.confidence_level}","${rec.status}","${getTimeframeLabel(rec.timeframe)}","${rec.advisor?.name || ''}","${new Date(rec.created_at).toLocaleDateString()}"\n`;
       });
     } else if (searchType === 'performance') {
       csvContent += 'Advisor,Total Recommendations,Successful,Success Rate\n';
@@ -308,8 +316,12 @@ export const Search: React.FC = () => {
                         </span>
                       </div>
                       <p className="text-xs text-gray-600 mb-1">
-                        By {rec.advisor?.name} • Target: ${rec.target_price} • Confidence: {rec.confidence_level}%
+                        By {rec.advisor?.name} • Target: ${rec.target_price} • {getTimeframeLabel(rec.timeframe)}
                       </p>
+                      <div className="flex items-center space-x-2 mb-1">
+                        <span className="text-xs text-gray-600">Confidence:</span>
+                        <StarRating rating={rec.confidence_level} size="sm" />
+                      </div>
                       <p className="text-xs text-gray-500 line-clamp-2">{rec.reasoning}</p>
                     </div>
                   </div>

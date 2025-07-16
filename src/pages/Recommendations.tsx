@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useRecommendations } from '../hooks/useRecommendations';
+import { getTimeframeLabel } from '../utils/timeframe';
 import { RecommendationFormModal } from '../components/modals/RecommendationFormModal';
 import { RecommendationDetailModal } from '../components/modals/RecommendationDetailModal';
 import { Recommendation } from '../types';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
+import { StarRating } from '../components/ui/StarRating';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { TrendingUp, Plus, Search, Filter } from 'lucide-react';
 
@@ -170,13 +172,16 @@ export const Recommendations: React.FC = () => {
                   <p className="text-xs md:text-sm text-gray-600 mb-2">
                     <span className="hidden sm:inline">By {recommendation.advisor?.name} • </span>
                     <span className="sm:hidden">{recommendation.advisor?.name} • </span>
-                    Target: ${recommendation.target_price}
+                    Target: ${recommendation.target_price} • {getTimeframeLabel(recommendation.timeframe)}
                   </p>
                   <p className="text-xs md:text-sm text-gray-700 mb-3 md:mb-4 line-clamp-2">
                     {recommendation.reasoning}
                   </p>
                   <div className="flex flex-wrap items-center gap-2 md:gap-4 text-xs text-gray-500">
-                    <span className="whitespace-nowrap">Confidence: {recommendation.confidence_level}%</span>
+                    <div className="flex items-center space-x-1">
+                      <span className="whitespace-nowrap">Confidence:</span>
+                      <StarRating rating={recommendation.confidence_level} size="sm" />
+                    </div>
                     <span className="whitespace-nowrap">{new Date(recommendation.created_at).toLocaleDateString()}</span>
                   </div>
                 </div>

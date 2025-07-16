@@ -10,6 +10,7 @@ import { User, Mail, Phone, Briefcase, Edit } from 'lucide-react';
 export const MyProfile: React.FC = () => {
   const { user } = useAuth();
   const { fetchAdvisorProfile, updateAdvisor } = useAdvisors();
+  const profileImageInputRef = React.useRef<HTMLInputElement>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saveLoading, setSaveLoading] = useState(false);
@@ -34,6 +35,14 @@ export const MyProfile: React.FC = () => {
   const getDefaultAvatar = () => {
     return 'https://images.pexels.com/photos/2182970/pexels-photo-2182970.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face';
   };
+
+  const handleUploadPhotoClick = () => {
+    if (profileImageInputRef.current) {
+      profileImageInputRef.current.focus();
+      profileImageInputRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
   useEffect(() => {
     if (user?.id) {
       loadAdvisorProfile();
@@ -143,7 +152,12 @@ export const MyProfile: React.FC = () => {
           </h3>
           <p className="text-xs md:text-sm text-gray-600 mb-4 truncate">{formData.specialization || 'Specialization'}</p>
           {isEditing && (
-            <Button size="sm" variant="secondary" className="w-full sm:w-auto">
+            <Button 
+              size="sm" 
+              variant="secondary" 
+              className="w-full sm:w-auto"
+              onClick={handleUploadPhotoClick}
+            >
               <span className="hidden sm:inline">Upload Photo</span>
               <span className="sm:hidden">Upload</span>
             </Button>
@@ -251,6 +265,7 @@ export const MyProfile: React.FC = () => {
                   Profile Image URL
                 </label>
                 <Input
+                  ref={profileImageInputRef}
                   value={formData.profile_image_url}
                   onChange={(e) => setFormData({ ...formData, profile_image_url: e.target.value })}
                   placeholder="Enter image URL"
