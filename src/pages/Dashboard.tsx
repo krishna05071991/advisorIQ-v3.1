@@ -1,6 +1,4 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
-import { supabase } from '../supabase';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { usePerformanceMetrics } from '../hooks/usePerformanceMetrics';
 import { useRecommendations } from '../hooks/useRecommendations';
@@ -8,6 +6,7 @@ import { DashboardStats } from '../components/dashboard/DashboardStats';
 import { RecentActivity } from '../components/dashboard/RecentActivity';
 import { TopPerformers } from '../components/dashboard/TopPerformers';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
+import { supabase } from '../lib/supabase';
 
 export const Dashboard: React.FC = () => {
   const { user } = useAuth();
@@ -94,9 +93,6 @@ export const Dashboard: React.FC = () => {
             <TopPerformers performers={dashboardStats?.top_performers || []} />
           </div>
         )}
-      </div>
-    </div>
-  );
       </div>
     </div>
   );
