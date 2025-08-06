@@ -89,6 +89,22 @@ export const useRecommendations = (
 
   const createRecommendation = async (recommendationData: Partial<Recommendation>) => {
     try {
+      // Ensure we have the advisor_id
+      if (!recommendationData.advisor_id && user?.role === 'advisor') {
+        // Get advisor ID from advisors table using user_id
+        const { data: advisor } = await supabase
+          .from('advisors')
+          .select('id')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (advisor) {
+          recommendationData.advisor_id = advisor.id;
+        } else {
+          throw new Error('Advisor profile not found');
+        }
+      }
+
       const { error } = await supabase
         .from('recommendations')
         .insert(recommendationData);

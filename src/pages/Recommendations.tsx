@@ -195,7 +195,7 @@ export const Recommendations: React.FC = () => {
                     variant="ghost" 
                     className="flex-1 md:flex-none"
                     disabled={user?.role === 'operations'}
-                    title={user?.role === 'operations' ? 'Operations staff cannot edit recommendations' : ''}
+                    title={user?.role === 'operations' ? 'Operations staff cannot edit recommendations' : 'Edit this recommendation'}
                     onClick={() => handleEditRecommendation(recommendation)}
                   >
                     Edit

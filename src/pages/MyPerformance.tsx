@@ -9,7 +9,7 @@ import { TrendingUp, Target, Award, BarChart3 } from 'lucide-react';
 export const MyPerformance: React.FC = () => {
   const { user } = useAuth();
   const [advisorId, setAdvisorId] = useState<string | null>(null);
-  const { metrics, loading } = usePerformanceMetrics(advisorId || undefined);
+  const { metrics, loading, dashboardStats } = usePerformanceMetrics(advisorId || undefined);
 
   useEffect(() => {
     const fetchAdvisorId = async () => {
@@ -37,8 +37,19 @@ export const MyPerformance: React.FC = () => {
     );
   }
 
-  const myMetrics = metrics.find(m => m.advisor_id === user?.id);
+  // Find metrics by advisorId, not user.id
   const advisorMetrics = advisorId ? metrics.find(m => m.advisor_id === advisorId) : null;
+  
+  // If we don't have metrics from the performance table, create basic stats from dashboard data
+  const defaultMetrics = {
+    total_recommendations: dashboardStats?.total_recommendations || 0,
+    successful_recommendations: dashboardStats?.total_recommendations ? 
+      Math.floor((dashboardStats.overall_success_rate / 100) * dashboardStats.total_recommendations) : 0,
+    ongoing_recommendations: dashboardStats?.active_recommendations || 0,
+    success_rate: dashboardStats?.overall_success_rate || 0
+  };
+  
+  const displayMetrics = advisorMetrics || defaultMetrics;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -57,7 +68,7 @@ export const MyPerformance: React.FC = () => {
                 <span className="sm:hidden">Total</span>
               </p>
               <p className="text-lg md:text-2xl font-bold text-gray-900">
-                {advisorMetrics?.total_recommendations || 0}
+                {displayMetrics.total_recommendations}
               </p>
             </div>
             <TrendingUp className="w-6 md:w-8 h-6 md:h-8 text-blue-600" />
@@ -69,7 +80,7 @@ export const MyPerformance: React.FC = () => {
             <div>
               <p className="text-xs md:text-sm font-medium text-gray-600 mb-1">Success Rate</p>
               <p className="text-lg md:text-2xl font-bold text-gray-900">
-                {advisorMetrics?.success_rate?.toFixed(1) || 0}%
+                {displayMetrics.success_rate.toFixed(1)}%
               </p>
             </div>
             <Target className="w-6 md:w-8 h-6 md:h-8 text-green-600" />
@@ -81,7 +92,7 @@ export const MyPerformance: React.FC = () => {
             <div>
               <p className="text-xs md:text-sm font-medium text-gray-600 mb-1">Successful</p>
               <p className="text-lg md:text-2xl font-bold text-gray-900">
-                {advisorMetrics?.successful_recommendations || 0}
+                {displayMetrics.successful_recommendations}
               </p>
             </div>
             <Award className="w-6 md:w-8 h-6 md:h-8 text-yellow-600" />
@@ -93,7 +104,7 @@ export const MyPerformance: React.FC = () => {
             <div>
               <p className="text-xs md:text-sm font-medium text-gray-600 mb-1">Ongoing</p>
               <p className="text-lg md:text-2xl font-bold text-gray-900">
-                {advisorMetrics?.ongoing_recommendations || 0}
+                {displayMetrics.ongoing_recommendations}
               </p>
             </div>
             <BarChart3 className="w-6 md:w-8 h-6 md:h-8 text-purple-600" />

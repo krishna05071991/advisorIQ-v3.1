@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useRecommendations } from '../hooks/useRecommendations';
 import { RecommendationFormModal } from '../components/modals/RecommendationFormModal';
+import { RecommendationFormModal } from '../components/modals/RecommendationFormModal';
 import { Recommendation } from '../types';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -14,8 +15,11 @@ export const MyRecommendations: React.FC = () => {
   const { user } = useAuth();
   // Get advisor ID from advisors table, not user ID
   const [advisorId, setAdvisorId] = useState<string | null>(null);
-  const { recommendations, loading, createRecommendation } = useRecommendations(advisorId || undefined);
+  const { recommendations, loading, createRecommendation, updateRecommendation } = useRecommendations(advisorId || undefined);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [selectedRecommendation, setSelectedRecommendation] = useState<Recommendation | null>(null);
+  const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [selectedRecommendation, setSelectedRecommendation] = useState<Recommendation | null>(null);
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
@@ -44,14 +48,27 @@ export const MyRecommendations: React.FC = () => {
     setIsFormModalOpen(true);
   };
 
+  const handleEditRecommendation = (recommendation: Recommendation) => {
+    setSelectedRecommendation(recommendation);
+    setFormMode('edit');
+    setIsFormModalOpen(true);
+  };
+
   const closeModals = () => {
     setIsFormModalOpen(false);
     setSelectedRecommendation(null);
   };
 
   const handleFormSubmit = async (data: Partial<Recommendation>) => {
-    if (advisorId) {
-      await createRecommendation({ ...data, advisor_id: advisorId });
+    try {
+      if (formMode === 'create') {
+        await createRecommendation({ ...data, advisor_id: advisorId });
+      } else if (selectedRecommendation) {
+        await updateRecommendation(selectedRecommendation.id, data);
+      }
+    } catch (error) {
+      console.error('Error submitting recommendation:', error);
+      throw error;
     }
   };
 
@@ -159,7 +176,12 @@ export const MyRecommendations: React.FC = () => {
                     <span className="hidden sm:inline">Update Status</span>
                     <span className="sm:hidden">Update</span>
                   </Button>
-                  <Button size="sm" variant="ghost" className="flex-1 md:flex-none">
+                  <Button 
+                    size="sm" 
+                    variant="ghost" 
+                    className="flex-1 md:flex-none"
+                    onClick={() => handleEditRecommendation(recommendation)}
+                  >
                     Edit
                   </Button>
                 </div>
