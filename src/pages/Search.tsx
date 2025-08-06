@@ -43,7 +43,16 @@ export const Search: React.FC = () => {
   const { metrics } = usePerformanceMetrics();
 
   const handleSearch = async () => {
-    if (!searchTerm.trim()) return;
+    if (!searchTerm.trim()) {
+      // Show user feedback if no search term is entered
+      setHasSearched(true);
+      setSearchResults({
+        advisors: [],
+        recommendations: [],
+        performance: []
+      });
+      return;
+    }
     
     setLoading(true);
     setHasSearched(true);
