@@ -80,6 +80,7 @@ export const RecommendationFormModal: React.FC<RecommendationFormModalProps> = (
         ...formData,
         target_price: targetPrice,
         stock_symbol: formData.stock_symbol.toUpperCase(),
+        confidence_level: Math.max(1, Math.min(100, formData.confidence_level)),
       };
 
       await onSubmit(submitData);
