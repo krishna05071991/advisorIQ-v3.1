@@ -6,7 +6,7 @@ import { DashboardStats } from '../components/dashboard/DashboardStats';
 import { RecentActivity } from '../components/dashboard/RecentActivity';
 import { TopPerformers } from '../components/dashboard/TopPerformers';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../supabase';
 
 export const Dashboard: React.FC = () => {
   const { user } = useAuth();
