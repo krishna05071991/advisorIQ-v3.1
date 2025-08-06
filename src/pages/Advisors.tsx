@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import { useAdvisors } from '../hooks/useAdvisors';
 import { AdvisorFormModal } from '../components/modals/AdvisorFormModal';
 import { AdvisorDetailModal } from '../components/modals/AdvisorDetailModal';
@@ -10,6 +11,7 @@ import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { Users, Plus, Search, Filter } from 'lucide-react';
 
 export const Advisors: React.FC = () => {
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSpecialization, setFilterSpecialization] = useState('');
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
