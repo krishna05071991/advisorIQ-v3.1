@@ -20,7 +20,7 @@ export const AdvisorDetailModal: React.FC<AdvisorDetailModalProps> = ({
   if (!isOpen || !advisor) return null;
 
   const getAvatarUrl = () => {
-    if (advisor.profile_image) return advisor.profile_image;
+    if (advisor.profile_image_url) return advisor.profile_image_url;
     // Use first item from the predefined avatar list as default
     return 'https://images.pexels.com/photos/2182970/pexels-photo-2182970.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face';
   };

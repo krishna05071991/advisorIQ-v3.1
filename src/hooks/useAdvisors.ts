@@ -2,14 +2,14 @@ import { useState, useEffect } from 'react';
 import { Advisor } from '../types';
 import { supabase } from '../supabase';
 
-export const useAdvisors = (searchTerm?: string, filterSpecialization?: string) => {
+export const useAdvisors = (searchTerm?: string, filterSpecialization?: string, dateFrom?: string, dateTo?: string) => {
   const [advisors, setAdvisors] = useState<Advisor[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchAdvisors();
-  }, [searchTerm, filterSpecialization]);
+  }, [searchTerm, filterSpecialization, dateFrom, dateTo]);
 
   const fetchAdvisors = async () => {
     try {
@@ -29,6 +29,15 @@ export const useAdvisors = (searchTerm?: string, filterSpecialization?: string) 
       // Apply specialization filter
       if (filterSpecialization && filterSpecialization.trim()) {
         query = query.eq('specialization', filterSpecialization);
+      }
+      
+      // Apply date filters
+      if (dateFrom && dateFrom.trim()) {
+        query = query.gte('created_at', dateFrom);
+      }
+      
+      if (dateTo && dateTo.trim()) {
+        query = query.lte('created_at', dateTo);
       }
       
       const { data, error } = await query;

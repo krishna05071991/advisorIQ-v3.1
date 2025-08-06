@@ -2,6 +2,8 @@ import { supabase } from '../supabase';
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useRecommendations } from '../hooks/useRecommendations';
+import { RecommendationFormModal } from '../components/modals/RecommendationFormModal';
+import { Recommendation } from '../types';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -12,8 +14,11 @@ export const MyRecommendations: React.FC = () => {
   const { user } = useAuth();
   // Get advisor ID from advisors table, not user ID
   const [advisorId, setAdvisorId] = useState<string | null>(null);
-  const { recommendations, loading } = useRecommendations(advisorId || undefined);
+  const { recommendations, loading, createRecommendation } = useRecommendations(advisorId || undefined);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [selectedRecommendation, setSelectedRecommendation] = useState<Recommendation | null>(null);
+  const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
 
   useEffect(() => {
     const fetchAdvisorId = async () => {
@@ -32,6 +37,23 @@ export const MyRecommendations: React.FC = () => {
 
     fetchAdvisorId();
   }, [user?.id]);
+
+  const handleAddRecommendation = () => {
+    setSelectedRecommendation(null);
+    setFormMode('create');
+    setIsFormModalOpen(true);
+  };
+
+  const closeModals = () => {
+    setIsFormModalOpen(false);
+    setSelectedRecommendation(null);
+  };
+
+  const handleFormSubmit = async (data: Partial<Recommendation>) => {
+    if (advisorId) {
+      await createRecommendation({ ...data, advisor_id: advisorId });
+    }
+  };
 
   if (loading) {
     return (
@@ -66,7 +88,10 @@ export const MyRecommendations: React.FC = () => {
             <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">My Recommendations</h1>
             <p className="text-sm md:text-base text-gray-600">Track your investment recommendations</p>
           </div>
-          <Button className="flex items-center space-x-1 md:space-x-2 px-3 md:px-6">
+          <Button 
+            onClick={handleAddRecommendation}
+            className="flex items-center space-x-1 md:space-x-2 px-3 md:px-6"
+          >
             <Plus className="w-4 h-4" />
             <span className="hidden sm:inline">Add Recommendation</span>
             <span className="sm:hidden">Add</span>
@@ -96,7 +121,7 @@ export const MyRecommendations: React.FC = () => {
               : 'Get started by adding your first recommendation'
             }
           </p>
-          <Button className="w-full sm:w-auto">
+          <Button onClick={handleAddRecommendation} className="w-full sm:w-auto">
             <Plus className="w-4 h-4 mr-2" />
             <span className="hidden sm:inline">Add Recommendation</span>
             <span className="sm:hidden">Add</span>
@@ -143,6 +168,15 @@ export const MyRecommendations: React.FC = () => {
           ))}
         </div>
       )}
+
+      {/* Modals */}
+      <RecommendationFormModal
+        isOpen={isFormModalOpen}
+        onClose={closeModals}
+        onSubmit={handleFormSubmit}
+        recommendation={selectedRecommendation}
+        mode={formMode}
+      />
     </div>
   );
 };

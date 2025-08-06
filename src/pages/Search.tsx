@@ -38,8 +38,39 @@ export const Search: React.FC = () => {
   const [hasSearched, setHasSearched] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const { advisors } = useAdvisors();
-  const { recommendations } = useRecommendations();
+  // Calculate date filters for hooks
+  const getDateFilters = () => {
+    let dateFrom = advancedFilters.dateFrom;
+    let dateTo = advancedFilters.dateTo;
+    
+    if (dateRange && !dateFrom) {
+      const now = new Date();
+      if (dateRange === '7d') {
+        dateFrom = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      } else if (dateRange === '30d') {
+        dateFrom = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      } else if (dateRange === '90d') {
+        dateFrom = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString();
+      } else if (dateRange === '1y') {
+        dateFrom = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000).toISOString();
+      }
+    }
+    
+    return { dateFrom, dateTo };
+  };
+
+  const { dateFrom, dateTo } = getDateFilters();
+  const { advisors } = useAdvisors(searchTerm, advancedFilters.specialization, dateFrom, dateTo);
+  const { recommendations } = useRecommendations(
+    undefined,
+    searchTerm,
+    advancedFilters.status,
+    advancedFilters.action,
+    advancedFilters.confidenceMin,
+    advancedFilters.confidenceMax,
+    dateFrom,
+    dateTo
+  );
   const { metrics } = usePerformanceMetrics();
 
   const handleSearch = async () => {
@@ -55,85 +86,48 @@ export const Search: React.FC = () => {
         performance: []
       };
 
-      // Apply date filter helper
-      const applyDateFilter = (items: any[], dateField: string = 'created_at') => {
-        return items.filter(item => {
-          const itemDate = new Date(item[dateField]);
-          const now = new Date();
-          
-          if (dateRange === '7d') {
-            return itemDate >= new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-          } else if (dateRange === '30d') {
-            return itemDate >= new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-          } else if (dateRange === '90d') {
-            return itemDate >= new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
-          } else if (dateRange === '1y') {
-            return itemDate >= new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
-          }
-          
-          // Custom date range from advanced filters
-          if (advancedFilters.dateFrom && itemDate < new Date(advancedFilters.dateFrom)) {
-            return false;
-          }
-          if (advancedFilters.dateTo && itemDate > new Date(advancedFilters.dateTo)) {
-            return false;
-          }
-          
-          return true;
-        });
-      };
+      // Calculate date filters
+      let dateFrom = advancedFilters.dateFrom;
+      let dateTo = advancedFilters.dateTo;
+      
+      if (dateRange && !dateFrom) {
+        const now = new Date();
+        if (dateRange === '7d') {
+          dateFrom = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+        } else if (dateRange === '30d') {
+          dateFrom = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
+        } else if (dateRange === '90d') {
+          dateFrom = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString();
+        } else if (dateRange === '1y') {
+          dateFrom = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000).toISOString();
+        }
+      }
 
       // Search Advisors
       if (searchType === 'all' || searchType === 'advisors') {
-        let filteredAdvisors = advisors.filter(advisor =>
+        // Use the hook with proper filters - we'll need to refetch data
+        results.advisors = advisors.filter(advisor =>
           advisor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           advisor.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
           (advisor.specialization && advisor.specialization.toLowerCase().includes(searchTerm.toLowerCase()))
         );
-
-        // Apply advanced filters
-        if (advancedFilters.specialization) {
-          filteredAdvisors = filteredAdvisors.filter(advisor => 
-            advisor.specialization === advancedFilters.specialization
-          );
-        }
-
-        results.advisors = applyDateFilter(filteredAdvisors);
       }
 
       // Search Recommendations
       if (searchType === 'all' || searchType === 'recommendations') {
-        let filteredRecommendations = recommendations.filter(rec =>
+        results.recommendations = recommendations.filter(rec =>
           rec.stock_symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
           rec.reasoning.toLowerCase().includes(searchTerm.toLowerCase()) ||
           (rec.advisor?.name && rec.advisor.name.toLowerCase().includes(searchTerm.toLowerCase()))
         );
-
-        // Apply advanced filters
-        if (advancedFilters.action) {
-          filteredRecommendations = filteredRecommendations.filter(rec => rec.action === advancedFilters.action);
-        }
-        if (advancedFilters.status) {
-          filteredRecommendations = filteredRecommendations.filter(rec => rec.status === advancedFilters.status);
-        }
-        if (advancedFilters.confidenceMin || advancedFilters.confidenceMax !== 100) {
-          filteredRecommendations = filteredRecommendations.filter(rec => 
-            rec.confidence_level >= advancedFilters.confidenceMin && 
-            rec.confidence_level <= advancedFilters.confidenceMax
-          );
-        }
-
-        results.recommendations = applyDateFilter(filteredRecommendations);
       }
 
       // Search Performance
       if (searchType === 'all' || searchType === 'performance') {
-        let filteredPerformance = metrics.filter(metric =>
+        results.performance = metrics.filter(metric =>
           metric.advisor?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
           metric.advisor?.specialization?.toLowerCase().includes(searchTerm.toLowerCase())
         );
-
-        results.performance = filteredPerformance;
       }
 
       setSearchResults(results);

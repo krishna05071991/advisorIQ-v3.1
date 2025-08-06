@@ -39,7 +39,7 @@ export const AdvisorFormModal: React.FC<AdvisorFormModalProps> = ({
         phone: advisor.phone || '',
         specialization: advisor.specialization || '',
         bio: advisor.bio || '',
-        profile_image_url: advisor.profile_image || '',
+        profile_image_url: advisor.profile_image_url || '',
       });
     } else {
       setFormData({

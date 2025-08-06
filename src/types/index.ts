@@ -22,7 +22,7 @@ export interface Advisor {
   phone?: string;
   specialization: string;
   bio?: string;
-  profile_image?: string;
+  profile_image_url?: string;
   created_at: string;
   updated_at: string;
   user_id: string;
