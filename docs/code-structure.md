@@ -50,27 +50,24 @@ This document provides a comprehensive list of ALL functionalities implemented i
 - **View All Advisors**: Complete list of all active advisors in the network  
 - **Search Advisors**: Real-time search by name, email, or specialization  
 - **Filter by Specialization**: Filter advisors by their area of expertise  
+- **View-Only Access**: Admin users can view all advisor profiles but cannot edit them
 - **Advisor Profile Viewing**: Detailed advisor profiles with contact info and bio  
-- **Edit Advisor Profiles**: Modify advisor information including:  
-  - Name and contact details  
-  - Specialization area  
-  - Biography  
-  - Profile image URL  
-  - Phone number
+- **Edit Restrictions**: Admin users cannot edit advisor profiles - UI provides user-friendly messages asking to contact the advisor directly for profile updates
 
 ### 3\. Recommendation Management (`/recommendations`)
 
 - **View All Recommendations**: Complete list of all recommendations across all advisors  
 - **Search Recommendations**: Search by stock symbol, advisor name, or reasoning text  
 - **Filter by Status**: Filter recommendations by ongoing, successful, or unsuccessful  
+- **View-Only Access**: Admin users can view all recommendation details but cannot edit them
 - **Recommendation Details**: View complete recommendation information including:  
   - Stock symbol and action (buy/sell/hold)  
   - Target price and confidence level  
   - Detailed reasoning  
   - Advisor information  
   - Timeline and status  
-- **Edit Recommendations**: Modify recommendation details and status  
-- **Star Rating Display**: Visual confidence level representation
+- **Edit Restrictions**: Admin users cannot edit recommendations - UI provides user-friendly messages explaining only advisors can edit their own recommendations
+- **Confidence Level Display**: Visual confidence level representation (1-5 scale)
 
 ### 4\. Analytics & Performance (`/analytics`)
 
@@ -92,9 +89,10 @@ This document provides a comprehensive list of ALL functionalities implemented i
 - **Multi-Type Search**: Search across advisors, recommendations, and performance data  
 - **Search Type Selection**: Toggle between "All", "Advisors", "Recommendations", "Performance"  
 - **Date Range Filtering**: Pre-defined ranges (7d, 30d, 90d, 1y) or custom dates  
+- **Search Button Feedback**: User-friendly feedback when searching without entering terms
 - **Advanced Filtering Modal** with:  
   - Custom date ranges  
-  - Confidence level sliders (for recommendations)  
+  - Confidence level sliders (1-5 scale for recommendations)  
   - Specialization filtering (for advisors)  
   - Action type filtering (buy/sell/hold)  
   - Status filtering (ongoing/successful/unsuccessful)  
@@ -122,13 +120,13 @@ This document provides a comprehensive list of ALL functionalities implemented i
   - Stock symbol input  
   - Action selection (buy/sell/hold)  
   - Target price setting  
-  - Confidence level (1-5 star rating)  
+  - Confidence level (1-5 scale: 1=Low, 5=Very High)  
   - Timeframe selection (3/6/12 months)  
   - Detailed reasoning text  
 - **Edit Own Recommendations**: Modify existing recommendations including:  
   - Update status (ongoing/successful/unsuccessful)  
   - Modify target price and reasoning  
-  - Adjust confidence level  
+  - Adjust confidence level (1-5 scale)  
 - **Recommendation Status Management**: Update recommendation outcomes
 
 ### 3\. My Performance (`/my-performance`)
@@ -144,7 +142,7 @@ This document provides a comprehensive list of ALL functionalities implemented i
   - Last 12 months of personal data  
 - **Personal Performance Breakdown**:  
   - Best performing stock symbol  
-  - Average confidence level  
+  - Average confidence level (1-5 scale)  
   - Most recommended action type
 
 ### 4\. My Profile (`/my-profile`)
@@ -180,8 +178,9 @@ This document provides a comprehensive list of ALL functionalities implemented i
 - **Responsive Design**: Optimized for mobile, tablet, and desktop  
 - **Loading States**: Loading spinners during data operations  
 - **Error Handling**: User-friendly error messages and validation  
-- **Star Rating Component**: Visual confidence level display (1-5 stars)  
+- **Confidence Level Component**: Visual confidence level display (1-5 scale)  
 - **Modal Systems**: Overlay modals for forms and detailed views
+- **Admin UI Restrictions**: Disabled buttons with tooltips explaining edit restrictions
 
 ### Data Management
 
@@ -190,6 +189,7 @@ This document provides a comprehensive list of ALL functionalities implemented i
 - **Error Recovery**: Graceful handling of failed operations  
 - **Search Debouncing**: Optimized search performance with debounced inputs  
 - **Data Validation**: Form validation for all user inputs
+- **Role-Based UI Controls**: Different capabilities and restrictions based on user role
 
 ---
 
@@ -240,6 +240,8 @@ interface AuthFlow {
   6\. Set user context state
 
   7\. Redirect to role-based dashboard
+
+  8\. Apply UI restrictions based on user role
 
 }
 
@@ -293,7 +295,9 @@ const login \= async (email: string, password: string) \=\> {
 
     email: profile.email,
 
-    role: profile.role \=== 'admin' ? 'operations' : 'advisor'
+    role: profile.role \=== 'admin' ? 'operations' : 'advisor',
+
+    permissions: profile.role \=== 'admin' ? 'view-only' : 'full-access'
 
   });
 
@@ -305,6 +309,7 @@ const login \= async (email: string, password: string) \=\> {
 - **Automatic profile creation**: Seamless user onboarding  
 - **Role-based mapping**: Clean separation between database roles and UI roles  
 - **Session persistence**: Automatic login state restoration
+- **UI permission mapping**: Role-based UI restrictions and capabilities
 
 ### Database Operations Pattern
 
@@ -382,6 +387,42 @@ function useAdvisors(searchTerm?, filterSpecialization?) {
 
   
 
+  // Separated queries for admin dashboard to avoid PostgREST relationship issues
+
+  const fetchAdvisorMetrics \= async () \=\> {
+
+    const { data: performanceData } \= await supabase
+
+      .from('advisor\_performance')
+
+      .select('\*');
+
+      
+
+    const { data: advisorData } \= await supabase
+
+      .from('advisors')
+
+      .select('\*')
+
+      .in('id', performanceData.map(p \=\> p.advisor\_id));
+
+      
+
+    // Manual join to create complete metrics
+
+    return performanceData.map(perf \=\> ({
+
+      ...perf,
+
+      advisor: advisorData.find(a \=\> a.id \=== perf.advisor\_id)
+
+    }));
+
+  };
+
+  
+
   // 3\. CRUD operations
 
   const updateAdvisor \= async (id, data) \=\> {
@@ -412,6 +453,7 @@ function useAdvisors(searchTerm?, filterSpecialization?) {
 - **Automatic refetching**: Data consistency after mutations  
 - **Built-in loading states**: Better UX with loading indicators  
 - **Error handling**: Graceful failure management
+- **Separated queries**: Avoid PostgREST relationship issues with views
 
 ### UI Component Architecture
 
@@ -516,6 +558,8 @@ function AdvisorsPage() {
 
   const \[searchTerm, setSearchTerm\] \= useState('');
 
+  const { user } \= useAuth();
+
   const { advisors } \= useAdvisors(searchTerm); // Custom hook handles debouncing
 
   
@@ -544,6 +588,22 @@ function AdvisorsPage() {
 
     /\>
 
+    
+
+    // Role-based UI restrictions
+
+    \<Button 
+
+      disabled={user?.role \=== 'operations'}
+
+      title={user?.role \=== 'operations' ? 'Please contact the advisor to update their profile' : ''}
+
+    \>
+
+      Edit
+
+    \</Button\>
+
   );
 
 }
@@ -554,6 +614,7 @@ function AdvisorsPage() {
 - **Server-side search**: Scalable for large datasets via Supabase  
 - **Debouncing**: Performance optimization to prevent excessive API calls  
 - **Progressive enhancement**: Works offline after initial data load
+- **Role-based restrictions**: UI controls based on user permissions
 
 ### Charts Implementation
 
@@ -643,7 +704,9 @@ function NetworkPerformanceChart({ timeSeriesData }) {
 
             borderRadius: '16px',
 
-            backdropFilter: 'blur(20px)'
+            backdropFilter: 'blur(20px)',
+
+            fontSize: '12px'
 
           }}
 
@@ -754,15 +817,21 @@ function RecommendationFormModal({ isOpen, onClose, onSubmit, mode }) {
 
           \<Input 
 
-            value={formData.stock\_symbol}
+            value={formData.confidence\_level}
 
             onChange={(e) \=\> setFormData(prev \=\> ({ 
 
               ...prev, 
 
-              stock\_symbol: e.target.value.toUpperCase() 
+              confidence\_level: parseInt(e.target.value) 
 
             }))}
+
+            type="range"
+
+            min="1"
+
+            max="5"
 
           /\>
 
@@ -790,6 +859,7 @@ function RecommendationFormModal({ isOpen, onClose, onSubmit, mode }) {
 - **Backdrop blur**: Modern modal experience with focus management  
 - **Controlled forms**: Predictable state management and validation  
 - **Loading states**: Better UX during async operations
+- **Input validation**: Proper range validation for confidence levels (1-5)
 
 ### Performance Optimization Strategies
 
@@ -871,6 +941,8 @@ function usePerformanceMetrics(advisorId?) {
 
       // Grouping and calculation logic
 
+      // Handle confidence_level range 1-5
+
       return acc;
 
     }, {});
@@ -893,6 +965,7 @@ function usePerformanceMetrics(advisorId?) {
 - **Client-side aggregation**: Better performance for small datasets  
 - **Memoization**: Prevent unnecessary recalculations  
 - **Conditional loading**: Load data only when needed
+- **Separated API calls**: Avoid PostgREST relationship errors with manual joins
 
 ### Mobile Responsiveness Implementation
 
@@ -948,6 +1021,8 @@ function Navigation() {
 
   const \[isMobileMenuOpen, setIsMobileMenuOpen\] \= useState(false);
 
+  const { user } \= useAuth();
+
   
 
   return (
@@ -965,6 +1040,12 @@ function Navigation() {
             \<Icon className="w-4 h-4" /\>
 
             \<span\>{item.label}\</span\>
+
+            {user?.role \=== 'operations' && item.restricted && (
+
+              \<span className="text-xs opacity-50"\>(View Only)\</span\>
+
+            )}
 
           \</NavLink\>
 
@@ -1014,6 +1095,7 @@ function Navigation() {
 - **Progressive enhancement**: Enhanced experience on larger screens  
 - **Touch-friendly targets**: 44px minimum for accessibility  
 - **Slide-out navigation**: Space-efficient mobile navigation pattern
+- **Role-based indicators**: Visual cues for restricted access
 
 ### Security Implementation
 
@@ -1107,6 +1189,8 @@ function AppRoutes() {
 
           \<Route path="/analytics" element={\<Analytics /\>} /\>
 
+          \<Route path="/search" element={\<Search /\>} /\>
+
         \</\>
 
       )}
@@ -1139,6 +1223,7 @@ function AppRoutes() {
 - **Role-based routing**: Clean separation of user capabilities  
 - **Authentication guards**: Prevent unauthorized access  
 - **Input validation**: Prevent malicious data submission
+- **UI-level restrictions**: Additional layer of access control with user-friendly messaging
 
 ### Data Flow Summary
 
@@ -1156,8 +1241,12 @@ Form Submission Flow:
 
 User Input → Form Validation → Loading State → API Call → Database Update → Data Refresh → UI Update
 
+UI Restriction Flow:
+
+User Action → Role Check → UI State (Enabled/Disabled) → User Feedback (Tooltips/Messages)
+
 Security Flow:
 
 User Action → Authentication Check → Role Authorization → RLS Policy → Database Operation → Success/Error Response
 
-This comprehensive implementation documentation provides your client with complete understanding of how each functionality was built, why specific technical decisions were made, and how the various components work together to create a cohesive, secure, and performant application.  
+This comprehensive implementation documentation provides your client with complete understanding of how each functionality was built, why specific technical decisions were made, and how the various components work together to create a cohesive, secure, and performant application.
