@@ -31,7 +31,7 @@ export const RecommendationFormModal: React.FC<RecommendationFormModalProps> = (
     action: 'buy' as 'buy' | 'sell' | 'hold',
     target_price: '',
     reasoning: '',
-    confidence_level: 75,
+    confidence_level: 3,
     status: 'ongoing' as 'ongoing' | 'successful' | 'unsuccessful',
   });
 
@@ -43,7 +43,7 @@ export const RecommendationFormModal: React.FC<RecommendationFormModalProps> = (
         action: recommendation.action || 'buy',
         target_price: recommendation.target_price?.toString() || '',
         reasoning: recommendation.reasoning || '',
-        confidence_level: recommendation.confidence_level || 75,
+        confidence_level: recommendation.confidence_level || 3,
         status: recommendation.status || 'ongoing',
       });
     } else {
@@ -53,7 +53,7 @@ export const RecommendationFormModal: React.FC<RecommendationFormModalProps> = (
         action: 'buy',
         target_price: '',
         reasoning: '',
-        confidence_level: 75,
+        confidence_level: 3,
         status: 'ongoing',
       });
     }
@@ -80,7 +80,7 @@ export const RecommendationFormModal: React.FC<RecommendationFormModalProps> = (
         ...formData,
         target_price: targetPrice,
         stock_symbol: formData.stock_symbol.toUpperCase(),
-        confidence_level: Math.max(1, Math.min(100, formData.confidence_level)),
+        confidence_level: Math.max(1, Math.min(5, formData.confidence_level)),
       };
 
       await onSubmit(submitData);
@@ -204,21 +204,21 @@ export const RecommendationFormModal: React.FC<RecommendationFormModalProps> = (
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Confidence Level: {formData.confidence_level}%
+                  Confidence Level: {formData.confidence_level} (1=Low, 5=Very High)
                 </label>
                 <input
                   type="range"
                   min="1"
-                  max="100"
+                  max="5"
                   value={formData.confidence_level}
                   onChange={(e) => handleInputChange('confidence_level', parseInt(e.target.value))}
                   className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
                   disabled={loading}
                 />
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
-                  <span>1%</span>
-                  <span>50%</span>
-                  <span>100%</span>
+                  <span>1 (Low)</span>
+                  <span>3 (Medium)</span>
+                  <span>5 (Very High)</span>
                 </div>
               </div>
 
