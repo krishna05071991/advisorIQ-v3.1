@@ -19,9 +19,6 @@ export const MyRecommendations: React.FC = () => {
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [selectedRecommendation, setSelectedRecommendation] = useState<Recommendation | null>(null);
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
-  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
-  const [selectedRecommendation, setSelectedRecommendation] = useState<Recommendation | null>(null);
-  const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
 
   useEffect(() => {
     const fetchAdvisorId = async () => {
