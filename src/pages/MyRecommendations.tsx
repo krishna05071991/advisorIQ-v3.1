@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useRecommendations } from '../hooks/useRecommendations';
 import { RecommendationFormModal } from '../components/modals/RecommendationFormModal';
-import { RecommendationFormModal } from '../components/modals/RecommendationFormModal';
 import { Recommendation } from '../types';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
