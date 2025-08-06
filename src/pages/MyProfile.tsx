@@ -14,6 +14,7 @@ export const MyProfile: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [advisorId, setAdvisorId] = useState<string | null>(null);
   const [originalData, setOriginalData] = useState({
     name: '',
     email: user?.email || '',
@@ -46,6 +47,7 @@ export const MyProfile: React.FC = () => {
       const profile = await fetchAdvisorProfile(user!.id);
       
       if (profile) {
+        setAdvisorId(profile.id);
         const profileData = {
           name: profile.name || '',
           email: profile.email || user?.email || '',
@@ -65,13 +67,13 @@ export const MyProfile: React.FC = () => {
   };
 
   const handleSave = async () => {
-    if (!user?.id) return;
+    if (!advisorId) return;
     
     try {
       setSaveLoading(true);
       setSaveError(null);
       
-      await updateAdvisor(user.id, {
+      await updateAdvisor(advisorId, {
         name: formData.name,
         phone: formData.phone,
         specialization: formData.specialization,
