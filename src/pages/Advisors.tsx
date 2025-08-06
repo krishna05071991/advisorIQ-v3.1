@@ -145,14 +145,26 @@ export const Advisors: React.FC = () => {
                       <span className="hidden sm:inline">View Profile</span>
                       <span className="sm:hidden">View</span>
                     </Button>
-                    <Button 
-                      size="sm" 
-                      variant="ghost" 
-                      className="flex-1 sm:flex-none"
-                      onClick={() => handleEditAdvisor(advisor)}
-                    >
-                      Edit
-                    </Button>
+                    {user?.role === 'advisor' ? (
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="flex-1 sm:flex-none"
+                        onClick={() => handleEditAdvisor(advisor)}
+                      >
+                        Edit
+                      </Button>
+                    ) : (
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="flex-1 sm:flex-none opacity-50 cursor-not-allowed"
+                        disabled
+                        title="Please contact the advisor to update their profile"
+                      >
+                        Edit
+                      </Button>
+                    )}
                   </div>
                 </div>
               </div>

@@ -190,14 +190,26 @@ export const Recommendations: React.FC = () => {
                     <span className="hidden sm:inline">View Details</span>
                     <span className="sm:hidden">View</span>
                   </Button>
-                  <Button 
-                    size="sm" 
-                    variant="ghost" 
-                    className="flex-1 md:flex-none"
-                    onClick={() => handleEditRecommendation(recommendation)}
-                  >
-                    Edit
-                  </Button>
+                  {user?.role === 'advisor' ? (
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      className="flex-1 md:flex-none"
+                      onClick={() => handleEditRecommendation(recommendation)}
+                    >
+                      Edit
+                    </Button>
+                  ) : (
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      className="flex-1 md:flex-none opacity-50 cursor-not-allowed"
+                      disabled
+                      title="Only advisors can edit their recommendations"
+                    >
+                      Edit
+                    </Button>
+                  )}
                 </div>
               </div>
             </Card>

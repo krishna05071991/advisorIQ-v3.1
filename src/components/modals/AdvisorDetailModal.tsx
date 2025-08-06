@@ -1,5 +1,6 @@
 import React from 'react';
 import { Advisor } from '../../types';
+import { useAuth } from '../../contexts/AuthContext';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { X, User, Mail, Phone, Briefcase, Calendar, Edit } from 'lucide-react';
@@ -17,6 +18,8 @@ export const AdvisorDetailModal: React.FC<AdvisorDetailModalProps> = ({
   advisor,
   onEdit
 }) => {
+  const { user } = useAuth();
+
   if (!isOpen || !advisor) return null;
 
   const getAvatarUrl = () => {
@@ -51,15 +54,30 @@ export const AdvisorDetailModal: React.FC<AdvisorDetailModalProps> = ({
               </div>
             </div>
             <div className="flex items-center space-x-2">
-              <Button
-                onClick={() => onEdit(advisor)}
-                variant="secondary"
-                size="sm"
-                className="flex items-center space-x-2"
-              >
-                <Edit className="w-4 h-4" />
-                <span>Edit</span>
-              </Button>
+              {user?.role === 'advisor' ? (
+                <Button
+                  onClick={() => onEdit(advisor)}
+                  variant="secondary"
+                  size="sm"
+                  className="flex items-center space-x-2"
+                >
+                  <Edit className="w-4 h-4" />
+                  <span>Edit</span>
+                </Button>
+              ) : (
+                <div className="text-center">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="flex items-center space-x-2 opacity-50 cursor-not-allowed"
+                    disabled
+                  >
+                    <Edit className="w-4 h-4" />
+                    <span>Edit</span>
+                  </Button>
+                  <p className="text-xs text-gray-500 mt-1">Contact advisor to update profile</p>
+                </div>
+              )}
               <button
                 onClick={onClose}
                 className="w-10 h-10 rounded-xl bg-white/60 backdrop-blur-sm flex items-center justify-center hover:bg-white/80 transition-all duration-300"
