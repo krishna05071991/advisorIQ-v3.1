@@ -82,27 +82,13 @@ export const useAdvisors = (searchTerm?: string, filterSpecialization?: string, 
 
   const updateAdvisor = async (advisorId: string, advisorData: Partial<Advisor>): Promise<void> => {
     try {
-      // First try to find advisor by user_id, then by id
-      let query = supabase
-        .from('advisors')
-        .select('id')
-        .eq('user_id', advisorId)
-        .single();
-      
-      const { data: existingAdvisor, error: findError } = await query;
-      
-      let updateId = advisorId;
-      if (existingAdvisor && !findError) {
-        updateId = existingAdvisor.id;
-      }
-
       const { error } = await supabase
         .from('advisors')
         .update({
           ...advisorData,
           updated_at: new Date().toISOString()
         })
-        .eq('id', updateId);
+        .eq('id', advisorId);
       
       if (error) {
         throw error;

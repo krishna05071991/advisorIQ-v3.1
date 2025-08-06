@@ -71,7 +71,6 @@ export const MyProfile: React.FC = () => {
       setSaveLoading(true);
       setSaveError(null);
       
-      // Update advisor using user.id which will be resolved to advisor.id in the hook
       await updateAdvisor(user.id, {
         name: formData.name,
         phone: formData.phone,
@@ -82,9 +81,6 @@ export const MyProfile: React.FC = () => {
       
       setOriginalData({ ...formData });
       setIsEditing(false);
-      
-      // Reload the profile to ensure we have the latest data
-      await loadAdvisorProfile();
     } catch (error) {
       console.error('Error saving profile:', error);
       setSaveError('Failed to save profile. Please try again.');
@@ -133,12 +129,9 @@ export const MyProfile: React.FC = () => {
         <Card className="p-4 md:p-6 text-center" variant="glass">
           {formData.profile_image_url || getDefaultAvatar() ? (
             <img 
-              src={formData.profile_image_url && formData.profile_image_url.trim() !== '' ? formData.profile_image_url : getDefaultAvatar()} 
+              src={formData.profile_image_url || getDefaultAvatar()} 
               alt="Profile" 
               className="w-24 md:w-32 h-24 md:h-32 mx-auto mb-4 rounded-full object-cover border-4 border-white shadow-lg"
-              onError={(e) => {
-                e.currentTarget.src = getDefaultAvatar();
-              }}
             />
           ) : (
             <div className="w-24 md:w-32 h-24 md:h-32 mx-auto mb-4 rounded-full bg-blue-100 flex items-center justify-center">

@@ -23,7 +23,6 @@ export interface Advisor {
   specialization: string;
   bio?: string;
   profile_image_url?: string;
-  is_active?: boolean;
   created_at: string;
   updated_at: string;
   user_id: string;
