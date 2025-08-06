@@ -50,6 +50,9 @@ export interface PerformanceMetrics {
   unsuccessful_recommendations: number;
   ongoing_recommendations: number;
   success_rate: number;
+  best_performing_stock?: string;
+  avg_confidence_level?: number;
+  most_recommended_action?: 'buy' | 'sell' | 'hold';
   advisor?: Advisor;
 }
 

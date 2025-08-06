@@ -1,4 +1,6 @@
 import React from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '../supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { usePerformanceMetrics } from '../hooks/usePerformanceMetrics';
 import { useRecommendations } from '../hooks/useRecommendations';
@@ -9,12 +11,33 @@ import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 
 export const Dashboard: React.FC = () => {
   const { user } = useAuth();
-  const { dashboardStats, loading: metricsLoading } = usePerformanceMetrics();
+  const [advisorId, setAdvisorId] = useState<string | null>(null);
+  const { dashboardStats, advisorMetrics, loading: metricsLoading } = usePerformanceMetrics(
+    user?.role === 'advisor' ? advisorId : undefined
+  );
   const { recommendations, loading: recommendationsLoading } = useRecommendations(
-    user?.role === 'advisor' ? user.id : undefined
+    user?.role === 'advisor' ? advisorId : undefined
   );
 
   const loading = metricsLoading || recommendationsLoading;
+
+  useEffect(() => {
+    const fetchAdvisorId = async () => {
+      if (user?.id && user.role === 'advisor') {
+        const { data: advisor } = await supabase
+          .from('advisors')
+          .select('id')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (advisor) {
+          setAdvisorId(advisor.id);
+        }
+      }
+    };
+
+    fetchAdvisorId();
+  }, [user?.id, user?.role]);
 
   if (loading) {
     return (
@@ -25,13 +48,11 @@ export const Dashboard: React.FC = () => {
   }
 
   // For advisor role, create personalized stats from their recommendations
-  const advisorStats = user?.role === 'advisor' ? {
+  const advisorStats = user?.role === 'advisor' && advisorMetrics ? {
     total_advisors: 1, // The advisor themselves
-    total_recommendations: recommendations.length,
-    overall_success_rate: recommendations.length > 0 
-      ? (recommendations.filter(r => r.status === 'successful').length / recommendations.length) * 100
-      : 0,
-    active_recommendations: recommendations.filter(r => r.status === 'ongoing').length,
+    total_recommendations: advisorMetrics.total_recommendations,
+    overall_success_rate: advisorMetrics.success_rate,
+    active_recommendations: advisorMetrics.ongoing_recommendations,
   } : null;
 
   return (
@@ -68,13 +89,14 @@ export const Dashboard: React.FC = () => {
                 }))
           } />
         </div>
-        <div>
-          <TopPerformers performers={
-            user?.role === 'operations' 
-              ? (dashboardStats?.top_performers || [])
-              : []
-          } />
-        </div>
+        {user?.role === 'operations' && (
+          <div>
+            <TopPerformers performers={dashboardStats?.top_performers || []} />
+          </div>
+        )}
+      </div>
+    </div>
+  );
       </div>
     </div>
   );

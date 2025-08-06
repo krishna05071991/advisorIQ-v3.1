@@ -11,6 +11,7 @@ interface TimeSeriesData {
 
 export const usePerformanceMetrics = (advisorId?: string) => {
   const [metrics, setMetrics] = useState<PerformanceMetrics[]>([]);
+  const [advisorMetrics, setAdvisorMetrics] = useState<PerformanceMetrics | null>(null);
   const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);
   const [timeSeriesData, setTimeSeriesData] = useState<TimeSeriesData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,32 +45,110 @@ export const usePerformanceMetrics = (advisorId?: string) => {
 
   const fetchAdvisorMetrics = async (advisorId: string) => {
     try {
-      // Get advisor performance data
-      const { data: performanceData, error: perfError } = await supabase
-        .from('advisor_performance')
+      // Get advisor's recommendations to calculate metrics
+      const { data: recommendations, error: recError } = await supabase
+        .from('recommendations')
         .select(`
           *,
           advisor:advisors(*)
         `)
         .eq('advisor_id', advisorId);
 
-      if (perfError) throw perfError;
+      if (recError) throw recError;
 
-      setMetrics(performanceData || []);
+      if (recommendations && recommendations.length > 0) {
+        const totalRecs = recommendations.length;
+        const successfulRecs = recommendations.filter(r => r.status === 'successful').length;
+        const unsuccessfulRecs = recommendations.filter(r => r.status === 'unsuccessful').length;
+        const ongoingRecs = recommendations.filter(r => r.status === 'ongoing').length;
+        const successRate = totalRecs > 0 ? (successfulRecs / totalRecs) * 100 : 0;
+
+        // Calculate breakdown metrics
+        const stockCounts: { [key: string]: { total: number; successful: number } } = {};
+        const confidenceLevels: number[] = [];
+        const actionCounts: { [key: string]: number } = { buy: 0, sell: 0, hold: 0 };
+
+        recommendations.forEach(rec => {
+          // Track stock performance
+          if (!stockCounts[rec.stock_symbol]) {
+            stockCounts[rec.stock_symbol] = { total: 0, successful: 0 };
+          }
+          stockCounts[rec.stock_symbol].total++;
+          if (rec.status === 'successful') {
+            stockCounts[rec.stock_symbol].successful++;
+          }
+
+          // Track confidence levels
+          confidenceLevels.push(rec.confidence_level);
+
+          // Track actions
+          actionCounts[rec.action]++;
+        });
+
+        // Find best performing stock (highest success rate)
+        let bestStock = '';
+        let bestSuccessRate = -1;
+        Object.entries(stockCounts).forEach(([stock, data]) => {
+          const stockSuccessRate = data.total > 0 ? (data.successful / data.total) * 100 : 0;
+          if (stockSuccessRate > bestSuccessRate) {
+            bestSuccessRate = stockSuccessRate;
+            bestStock = stock;
+          }
+        });
+
+        // Calculate average confidence level
+        const avgConfidence = confidenceLevels.length > 0 
+          ? confidenceLevels.reduce((sum, conf) => sum + conf, 0) / confidenceLevels.length 
+          : 0;
+
+        // Find most recommended action
+        let mostAction: 'buy' | 'sell' | 'hold' = 'buy';
+        let maxActionCount = 0;
+        (Object.entries(actionCounts) as [('buy' | 'sell' | 'hold'), number][]).forEach(([action, count]) => {
+          if (count > maxActionCount) {
+            maxActionCount = count;
+            mostAction = action;
+          }
+        });
+
+        const advisorMetric: PerformanceMetrics = {
+          advisor_id: advisorId,
+          total_recommendations: totalRecs,
+          successful_recommendations: successfulRecs,
+          unsuccessful_recommendations: unsuccessfulRecs,
+          ongoing_recommendations: ongoingRecs,
+          success_rate: successRate,
+          best_performing_stock: bestStock,
+          avg_confidence_level: avgConfidence,
+          most_recommended_action: mostAction,
+          advisor: recommendations[0].advisor
+        };
+
+        setAdvisorMetrics(advisorMetric);
+      } else {
+        setAdvisorMetrics(null);
+      }
     } catch (err) {
       console.error('Error fetching advisor metrics:', err);
-      setMetrics([]);
+      setAdvisorMetrics(null);
     }
   };
 
-  const fetchTimeSeriesData = async () => {
+  const fetchTimeSeriesData = async (advisorId?: string) => {
     try {
       // Fetch recommendations grouped by month for the last 12 months
-      const { data: monthlyData, error } = await supabase
+      let query = supabase
         .from('recommendations')
         .select('created_at, status')
         .gte('created_at', new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString())
         .order('created_at');
+
+      // Filter by advisor if provided
+      if (advisorId) {
+        query = query.eq('advisor_id', advisorId);
+      }
+
+      const { data: monthlyData, error } = await query;
 
       if (error) throw error;
 
@@ -188,6 +267,7 @@ export const usePerformanceMetrics = (advisorId?: string) => {
 
   return {
     metrics,
+    advisorMetrics,
     dashboardStats,
     timeSeriesData,
     loading,

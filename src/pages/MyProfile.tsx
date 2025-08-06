@@ -20,7 +20,7 @@ export const MyProfile: React.FC = () => {
     phone: '',
     specialization: '',
     bio: '',
-    profile_image_url: '',
+    profile_image: '',
   });
   const [formData, setFormData] = useState({
     name: '',
@@ -28,7 +28,7 @@ export const MyProfile: React.FC = () => {
     phone: '',
     specialization: '',
     bio: '',
-    profile_image_url: '',
+    profile_image: '',
   });
 
   const getDefaultAvatar = () => {
@@ -52,7 +52,7 @@ export const MyProfile: React.FC = () => {
           phone: profile.phone || '',
           specialization: profile.specialization || '',
           bio: profile.bio || '',
-          profile_image_url: profile.profile_image_url || getDefaultAvatar(),
+          profile_image: profile.profile_image || getDefaultAvatar(),
         };
         setFormData(profileData);
         setOriginalData(profileData);
@@ -76,7 +76,7 @@ export const MyProfile: React.FC = () => {
         phone: formData.phone,
         specialization: formData.specialization,
         bio: formData.bio,
-        profile_image_url: formData.profile_image_url,
+        profile_image: formData.profile_image,
       });
       
       setOriginalData({ ...formData });
@@ -127,9 +127,9 @@ export const MyProfile: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
         {/* Profile Image */}
         <Card className="p-4 md:p-6 text-center" variant="glass">
-          {formData.profile_image_url || getDefaultAvatar() ? (
+          {formData.profile_image || getDefaultAvatar() ? (
             <img 
-              src={formData.profile_image_url || getDefaultAvatar()} 
+              src={formData.profile_image || getDefaultAvatar()} 
               alt="Profile" 
               className="w-24 md:w-32 h-24 md:h-32 mx-auto mb-4 rounded-full object-cover border-4 border-white shadow-lg"
             />
@@ -142,12 +142,6 @@ export const MyProfile: React.FC = () => {
             {formData.name || 'Your Name'}
           </h3>
           <p className="text-xs md:text-sm text-gray-600 mb-4 truncate">{formData.specialization || 'Specialization'}</p>
-          {isEditing && (
-            <Button size="sm" variant="secondary" className="w-full sm:w-auto">
-              <span className="hidden sm:inline">Upload Photo</span>
-              <span className="sm:hidden">Upload</span>
-            </Button>
-          )}
         </Card>
 
         {/* Profile Information */}
@@ -251,8 +245,8 @@ export const MyProfile: React.FC = () => {
                   Profile Image URL
                 </label>
                 <Input
-                  value={formData.profile_image_url}
-                  onChange={(e) => setFormData({ ...formData, profile_image_url: e.target.value })}
+                  value={formData.profile_image}
+                  onChange={(e) => setFormData({ ...formData, profile_image: e.target.value })}
                   placeholder="Enter image URL"
                   disabled={saveLoading}
                 />
