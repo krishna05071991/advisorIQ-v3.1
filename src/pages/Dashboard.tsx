@@ -68,11 +68,13 @@ export const Dashboard: React.FC = () => {
                 }))
           } />
         </div>
-        {user?.role === 'operations' && (
-          <div>
-            <TopPerformers performers={dashboardStats?.top_performers || []} />
-          </div>
-        )}
+        <div>
+          <TopPerformers performers={
+            user?.role === 'operations' 
+              ? (dashboardStats?.top_performers || [])
+              : []
+          } />
+        </div>
       </div>
     </div>
   );

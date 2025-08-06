@@ -3,16 +3,7 @@ import { Recommendation } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../supabase';
 
-export const useRecommendations = (
-  advisorId?: string, 
-  searchTerm?: string, 
-  filterStatus?: string,
-  filterAction?: string,
-  filterConfidenceMin?: number,
-  filterConfidenceMax?: number,
-  dateFrom?: string,
-  dateTo?: string
-) => {
+export const useRecommendations = (advisorId?: string, searchTerm?: string, filterStatus?: string) => {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,7 +11,7 @@ export const useRecommendations = (
 
   useEffect(() => {
     fetchRecommendations();
-  }, [advisorId, user, searchTerm, filterStatus, filterAction, filterConfidenceMin, filterConfidenceMax, dateFrom, dateTo]);
+  }, [advisorId, user, searchTerm, filterStatus]);
 
   const fetchRecommendations = async () => {
     try {
@@ -48,29 +39,6 @@ export const useRecommendations = (
       // Apply status filter
       if (filterStatus && filterStatus.trim()) {
         query = query.eq('status', filterStatus);
-      }
-
-      // Apply action filter
-      if (filterAction && filterAction.trim()) {
-        query = query.eq('action', filterAction);
-      }
-
-      // Apply confidence level filters
-      if (filterConfidenceMin !== undefined) {
-        query = query.gte('confidence_level', filterConfidenceMin);
-      }
-
-      if (filterConfidenceMax !== undefined) {
-        query = query.lte('confidence_level', filterConfidenceMax);
-      }
-
-      // Apply date filters
-      if (dateFrom && dateFrom.trim()) {
-        query = query.gte('created_at', dateFrom);
-      }
-
-      if (dateTo && dateTo.trim()) {
-        query = query.lte('created_at', dateTo);
       }
 
       const { data, error } = await query;

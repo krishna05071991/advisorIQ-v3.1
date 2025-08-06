@@ -38,7 +38,6 @@ export const MyPerformance: React.FC = () => {
   }
 
   const myMetrics = metrics.find(m => m.advisor_id === user?.id);
-  const advisorMetrics = advisorId ? metrics.find(m => m.advisor_id === advisorId) : null;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -57,7 +56,7 @@ export const MyPerformance: React.FC = () => {
                 <span className="sm:hidden">Total</span>
               </p>
               <p className="text-lg md:text-2xl font-bold text-gray-900">
-                {advisorMetrics?.total_recommendations || 0}
+                {myMetrics?.total_recommendations || 0}
               </p>
             </div>
             <TrendingUp className="w-6 md:w-8 h-6 md:h-8 text-blue-600" />
@@ -69,7 +68,7 @@ export const MyPerformance: React.FC = () => {
             <div>
               <p className="text-xs md:text-sm font-medium text-gray-600 mb-1">Success Rate</p>
               <p className="text-lg md:text-2xl font-bold text-gray-900">
-                {advisorMetrics?.success_rate?.toFixed(1) || 0}%
+                {myMetrics?.success_rate?.toFixed(1) || 0}%
               </p>
             </div>
             <Target className="w-6 md:w-8 h-6 md:h-8 text-green-600" />
@@ -81,7 +80,7 @@ export const MyPerformance: React.FC = () => {
             <div>
               <p className="text-xs md:text-sm font-medium text-gray-600 mb-1">Successful</p>
               <p className="text-lg md:text-2xl font-bold text-gray-900">
-                {advisorMetrics?.successful_recommendations || 0}
+                {myMetrics?.successful_recommendations || 0}
               </p>
             </div>
             <Award className="w-6 md:w-8 h-6 md:h-8 text-yellow-600" />
@@ -93,7 +92,7 @@ export const MyPerformance: React.FC = () => {
             <div>
               <p className="text-xs md:text-sm font-medium text-gray-600 mb-1">Ongoing</p>
               <p className="text-lg md:text-2xl font-bold text-gray-900">
-                {advisorMetrics?.ongoing_recommendations || 0}
+                {myMetrics?.ongoing_recommendations || 0}
               </p>
             </div>
             <BarChart3 className="w-6 md:w-8 h-6 md:h-8 text-purple-600" />
