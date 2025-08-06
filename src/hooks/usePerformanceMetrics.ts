@@ -231,16 +231,32 @@ export const usePerformanceMetrics = (advisorId?: string) => {
       }));
 
       // Fetch top performers
-      const { data: topPerformers, error: topError } = await supabase
+      // Fetch top performers - manual join to avoid view relationship issues
+      const { data: performanceData, error: perfError } = await supabase
         .from('advisor_performance')
-        .select(`
-          *,
-          advisor:advisors(*)
-        `)
+        .select('*')
         .order('success_rate', { ascending: false })
         .limit(5);
 
-      if (topError) throw topError;
+      if (perfError) throw perfError;
+
+      // Fetch advisor details separately and merge
+      let topPerformers: PerformanceMetrics[] = [];
+      if (performanceData && performanceData.length > 0) {
+        const advisorIds = performanceData.map(p => p.advisor_id);
+        const { data: advisorData, error: advisorError } = await supabase
+          .from('advisors')
+          .select('*')
+          .in('id', advisorIds);
+
+        if (advisorError) throw advisorError;
+
+        // Merge performance data with advisor data
+        topPerformers = performanceData.map(perf => ({
+          ...perf,
+          advisor: advisorData?.find(advisor => advisor.id === perf.advisor_id) || null
+        }));
+      }
 
       const dashboardStatsData: DashboardStats = {
         total_advisors: totalAdvisors || 0,
