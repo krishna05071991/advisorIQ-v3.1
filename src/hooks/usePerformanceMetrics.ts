@@ -34,12 +34,48 @@ export const usePerformanceMetrics = (advisorId?: string) => {
         // Fetch dashboard stats (for operations role)
         await fetchDashboardStats();
         await fetchTimeSeriesData();
+        await fetchAllAdvisorMetrics();
       }
     } catch (err) {
       console.error('Error fetching performance metrics:', err);
       setError('Failed to fetch performance metrics');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchAllAdvisorMetrics = async () => {
+    try {
+      // Fetch all advisor performance metrics for search functionality
+      const { data: performanceData, error: perfError } = await supabase
+        .from('advisor_performance')
+        .select('*')
+        .order('success_rate', { ascending: false });
+
+      if (perfError) throw perfError;
+
+      // Fetch advisor details separately and merge
+      let allMetrics: PerformanceMetrics[] = [];
+      if (performanceData && performanceData.length > 0) {
+        const advisorIds = performanceData.map(p => p.advisor_id);
+        const { data: advisorData, error: advisorError } = await supabase
+          .from('advisors')
+          .select('*')
+          .in('id', advisorIds);
+
+        if (advisorError) throw advisorError;
+
+        // Merge performance data with advisor data
+        allMetrics = performanceData.map(perf => ({
+          ...perf,
+          advisor: advisorData?.find(advisor => advisor.id === perf.advisor_id) || null
+        }));
+      }
+
+      setMetrics(allMetrics);
+    } catch (err) {
+      console.error('Error fetching all advisor metrics:', err);
+      setMetrics([]);
     }
   };
 
