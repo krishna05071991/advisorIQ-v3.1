@@ -20,18 +20,8 @@ export const Advisors: React.FC = () => {
   
   const { advisors, loading, updateAdvisor } = useAdvisors(searchTerm, filterSpecialization);
 
-  const getAvatarUrl = (index: number) => {
-    const avatars = [
-      'https://images.pexels.com/photos/2182970/pexels-photo-2182970.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face',
-      'https://images.pexels.com/photos/3785077/pexels-photo-3785077.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face',
-      'https://images.pexels.com/photos/3760263/pexels-photo-3760263.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face',
-      'https://images.pexels.com/photos/3777931/pexels-photo-3777931.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face',
-      'https://images.pexels.com/photos/3184298/pexels-photo-3184298.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face',
-      'https://images.pexels.com/photos/3756679/pexels-photo-3756679.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face',
-      'https://images.pexels.com/photos/3785079/pexels-photo-3785079.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face',
-      'https://images.pexels.com/photos/3771120/pexels-photo-3771120.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face'
-    ];
-    return avatars[index % avatars.length];
+  const getDefaultAvatar = () => {
+    return 'https://images.pexels.com/photos/2182970/pexels-photo-2182970.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face';
   };
 
   const handleEditAdvisor = (advisor: Advisor) => {
@@ -127,7 +117,7 @@ export const Advisors: React.FC = () => {
             <Card key={advisor.id} className="p-4 md:p-6" variant="glass">
               <div className="flex items-start space-x-3 md:space-x-4">
                 <img 
-                  src={getAvatarUrl(index)}
+                  src={advisor.profile_image || getDefaultAvatar()}
                   alt={advisor.name}
                   className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover border-2 border-white shadow-sm flex-shrink-0"
                 />
