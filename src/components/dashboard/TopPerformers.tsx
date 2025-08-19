@@ -30,16 +30,10 @@ export const TopPerformers: React.FC<TopPerformersProps> = ({ performers }) => {
     }
   };
 
-  const getAvatarUrl = (index: number) => {
-    const avatars = [
-      'https://images.pexels.com/photos/2182970/pexels-photo-2182970.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face',
-      'https://images.pexels.com/photos/3785077/pexels-photo-3785077.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face',
-      'https://images.pexels.com/photos/3760263/pexels-photo-3760263.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face',
-      'https://images.pexels.com/photos/3777931/pexels-photo-3777931.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face',
-      'https://images.pexels.com/photos/3184298/pexels-photo-3184298.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face'
-    ];
-    return avatars[index % avatars.length];
+  const getDefaultAvatar = () => {
+    return 'https://images.pexels.com/photos/2182970/pexels-photo-2182970.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face';
   };
+
   return (
     <Card className="p-6" gradient>
       <div className="flex items-center justify-between mb-6">
@@ -61,7 +55,7 @@ export const TopPerformers: React.FC<TopPerformersProps> = ({ performers }) => {
                 <div className="flex items-center space-x-3">
                   <div className="relative">
                     <img 
-                      src={getAvatarUrl(index)}
+                      src={performer.advisor?.profile_image || getDefaultAvatar()}
                       alt={performer.advisor?.name || 'Advisor'}
                       className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
                     />
